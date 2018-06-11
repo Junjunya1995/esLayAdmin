@@ -1,0 +1,137 @@
+{extend name="Admin/base:base" /}
+
+{block name="body"}
+<div class="layui-btn-group">
+    <a class="layui-btn layui-btn-sm layui-btn-normal" href="add">增加</a>
+    <button class="layui-btn layui-btn-sm layui-btn-warm ajaxPost" url="">启用</button>
+    <button class="layui-btn layui-btn-sm layui-btn-warm ajaxPost" url="">禁用</button>
+    <button class="layui-btn layui-btn-sm layui-btn-danger ajaxPost" url="">删除</button>
+</div>
+
+<table class="layui-hide" id="member" lay-filter="member"></table>
+
+{/block}
+{block name="script"}
+<script type="text/html" id="statusTpl">
+    {{#  if(d.status == 1){return "正常"; } else {return "禁用";} }}
+</script>
+<script type="text/html" id="operating">
+    <a class="layui-btn layui-btn-xs" lay-event="detail">详情</a>
+    <a class="layui-btn layui-btn-xs" lay-event="authorize">授权</a>
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="status">更改状态</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">删除</a>
+</script>
+<script type="text/javascript">
+    UrlHighlight("");
+    layui.use(['table', 'layer', 'jquery', 'form'], function () {
+        table_reload = layui.table.render({
+            elem: '#member',
+            url: "",
+            page: true,
+            method: 'post',
+            limit: 10,
+            id: "ids",
+            loading: false,
+            cols: [[ //table column
+                {checkbox: true},
+                {field: 'uid', title: 'UID', width: 100},
+                {field: 'nickname', title: '昵称', width: 200},
+                {field: 'score', title: '积分', width: 200},
+                {field: 'login', title: '登录次数', width: 200},
+                {field: 'last_login_time', title: '最后登录时间', width: 200},
+                {field: 'last_login_ip', title: '最后登录IP', width: 200},
+                {field: 'status', title: '状态', width: 200, templet: '#statusTpl'},
+                {fixed: 'right', title: '操作', align: 'center', width: 250, toolbar: '#operating'},
+            ]]
+        });
+        //监听工具条
+        layui.table.on('tool(member)', function (obj) {
+            switch (obj.event) {
+                case "status":
+                    layui.layer.confirm('确定执行该操作吗?', function (index) {
+                        layui.layer.close(index);
+                        layui.$.post("", {
+                            value: Math.abs(obj.data.status - 1),
+                            ids: obj.data.uid
+                        }, function (data) {
+                            if (data.code !== 1) {
+                                return alert_msg(data.msg, 0)
+                            };
+                            alert_msg(data.msg, 1);
+                            setTimeout(function () {
+                                table_reload.reload();
+                            }, 1500);
+                        });
+                    });
+                    break;
+                case 'delete':
+                    layui.layer.confirm('确定执行该操作吗?', function (index) {
+                        obj.del();
+                        layui.layer.close(index);
+                        layui.$.post("", {
+                            status: -1,
+                            ids: obj.data.uid
+                        }, function (data) {
+                            if (data.code !== 1) {
+                                return alert_msg(data.msg, 0)
+                            };
+                            alert_msg(data.msg, 1);
+                            setTimeout(function () {
+                                table_reload.reload();
+                            }, 1500);
+                        });
+                    });
+                    break;
+                case 'authorize':
+                    layui.$.get("", {id: obj.data.uid}, function (str) {
+                        if (str.code === 0) {
+                            return alert_msg(str.msg);
+                        };
+                        pop_up =layui.layer.open({
+                            type: 1,
+                            title: "用户授权详情",
+                            area: '550px',
+                            content: str,
+                        });
+                    });
+                    break;
+                case "detail" :
+                    window.location.href = createURL("", {uid: obj.data.uid});
+                    break;
+                default:
+                    layui.layer.msg('噢，天啊！你点了什么？');
+                    break;
+            }
+        });
+
+        //批量操作
+        layui.$('.ajaxPost').on('click', function () {
+            var Url=layui.$(this).attr('url'),ids='';
+            var checkStatus = layui.table.checkStatus('ids');
+            if(checkStatus.data.length===0){
+                return layui.layer.msg('请选择数据!');
+            }
+            layui.$.each(checkStatus.data,function (i,e) {
+                ids+="&ids[]="+e.uid;
+            })
+            var encode=encodeURI(ids.substr(1));
+            layui. layer.confirm('确认要执行该操作吗?',function (index) {
+                layui.$(this).prop('disabled', true);
+                layui.$.post(Url, encode,function (data) {
+                    layui.layer.close(index);
+                    layui.$(this).prop('disabled', false);
+                    if (data.code !== 1) {
+                        return alert_msg(data.msg, 0)
+                    }
+                    alert_msg(data.msg, 1);
+                    setTimeout(function () {
+                        table_reload.reload();
+                    }, 1500);
+                });
+            });
+            return false;
+        });
+    })
+</script>
+
+{/block}

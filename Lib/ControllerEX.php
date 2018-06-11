@@ -24,6 +24,7 @@ class ControllerEX extends Controller
     private $session = null;
 
 
+    
 
     public function index()
     {
@@ -42,7 +43,7 @@ class ControllerEX extends Controller
     public function fetch($template = '', $vars = [], $config = [])
     {
         if (empty($template)) { //未指定文件路径时
-            $template = str_replace('\\', '/', explode('App\HttpController\\',static::class)[1]) . '/' .$this->getActionName();
+            $template = $this->getControllerName() . '/' .$this->getActionName();
         }
         ob_start();
         $this->view->fetch($template, $vars, $config);
@@ -128,5 +129,10 @@ class ControllerEX extends Controller
     protected  function  requestex(): RequestEX
     {
         return new RequestEX(parent::request());
+    }
+
+    protected function getControllerName(): string
+    {
+        return  str_replace('\\', '/', explode('App\HttpController\\',static::class)[1]);
     }
 }

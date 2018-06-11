@@ -1,0 +1,108 @@
+{extend name="base:base" /}
+{block name="body"}
+<div class="layui-btn-group">
+    <a class="layui-btn layui-btn-sm layui-btn-normal" href="{:Url::build('edit')}">增加</a>
+    <button class="layui-btn layui-btn-sm layui-btn-warm ajax-post" url="{:Url::build('batchUpdate',['value'=>1])}" target-form="ids">启用</button>
+    <button class="layui-btn layui-btn-sm layui-btn-warm ajax-post" url="{:Url::build('batchUpdate',['value'=>0])}" target-form="ids">禁用</button>
+    <button class="layui-btn layui-btn-sm layui-btn-danger ajax-post" url="{:Url::build('batchUpdate',['value'=>-1])}" target-form="ids">删除</button>
+</div>
+
+<table class="layui-hide" id="links" lay-filter="links"></table>
+{/block}
+{block name="script"}
+<script type="text/html" id="statusTpl">
+    {{#  if(d.status == 1){return "正常"; } else {return "禁用";} }}
+</script>
+<script type="text/html" id="operating">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">详细</a>
+    <a class="layui-btn layui-btn-xs" lay-event="status">更改状态</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">删除</a>
+</script>
+<script type="text/javascript">
+    UrlHighlight("{:Url::build('Links/index')}");
+        layui.use(['jquery', 'form','table', 'layer'], function () {
+            table_reload = layui.table.render({
+                elem: '#links',
+                url: "{:Url::build('Links/linksJson')}",
+                page: true,
+                method: 'post',
+                limit: 10,
+                id: "ids",
+                loading: false,
+                cols: [[ //标题栏
+                    {checkbox: true},
+                    {field: 'id', title: '编号', width: 80},
+                    {field: 'title', title: '站点名称', width: 300},
+                    {field: 'mailto', title: '联系方式', width: 200},
+                    {field: 'link', title: '链接', width: 300},
+                    {field: 'sort', title: '排序(点击可编辑)', width: 240,edit: 'text'},
+                    {field: 'status', title: '状态', width: 200, templet: '#statusTpl'},
+                    {fixed: 'right', title: '操作', align: 'center', width: 200, toolbar: '#operating'},
+                ]]
+            });
+
+            //监听工具条
+            layui.table.on('tool(links)', function (obj) {
+                switch (obj.event) {
+                    case "status":
+                        layui.layer.confirm('确定执行该操作吗?', function (index) {
+                            layui.layer.close(index);
+                            layui.$.post("{:Url::build('setStatus')}", {
+                                value: Math.abs(obj.data.status - 1),
+                                ids: obj.data.id
+                            }, function (data) {
+                                if (data.code !== 1) {
+                                    return alert_msg(data.msg, 0)
+                                };
+                                alert_msg(data.msg, 1);
+                                setTimeout(function () {
+                                    table_reload.reload();
+                                }, 1500);
+                            });
+                        });
+                        break;
+                    case 'delete':
+                        layui.layer.confirm('确定执行该操作吗?', function (index) {
+                            layui.layer.close(index);
+                            layui.$.post("{:Url::build('setStatus')}", {
+                                value: -1,
+                                ids: obj.data.id
+                            }, function (data) {
+                                if (data.code !== 1) {
+                                    return alert_msg(data.msg, 0)
+                                };
+                                alert_msg(data.msg, 1);
+                                setTimeout(function () {
+                                    table_reload.reload();
+                                }, 1500);
+                            });
+                        });
+                        break;
+                    case 'detail':
+                        window.location.href = createURL("{:Url::build('edit')}", {id: obj.data.id});
+                        break;
+                    default:
+                        layui.layer.msg('噢，天啊！你点了什么？');
+                        break;
+                }
+            });
+            layui.table.on('edit(links)', function (obj) {
+                var sort = obj.value;
+                if (isNaN(sort)) {
+                    alert_msg('排序必须为一个数字', 0);
+                    return false;
+                }
+                layui.$.get("{:Url::build('sequence')}", {id: obj.data.id, sort: sort}, function (data) {
+                    if (data.code !== 1) {
+                        return alert_msg(data.msg, 0)
+                    }
+                    alert_msg(data.msg, 1);
+                    setTimeout(function () {
+                        table_reload.reload();
+                    }, 1500);
+                });
+            });
+        });
+</script>
+
+{/block}

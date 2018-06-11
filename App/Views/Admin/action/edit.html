@@ -1,0 +1,92 @@
+{extend name="base:base" /}
+{block name="body"}
+<fieldset class="layui-elem-field layui-field-title mt-15">
+    <legend>{present name="info"}编辑{else /}新增{/present}配置</legend>
+</fieldset>
+<form class="layui-form" action="{:Url::build('renew')}" method="post">
+    <div class="layui-form-item">
+        <label class="layui-form-label">行为标识</label>
+        <div class="layui-input-inline ">
+            <input type="text" name="name" lay-verify="name" value="{$info.name|default=''}" class="layui-input">
+        </div>
+        <div class="layui-form-mid layui-word-aux">输入行为标识 英文字母</div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">行为名称</label>
+        <div class="layui-input-inline">
+            <input type="text" name="title" lay-verify="required" lay-verify="title" value="{$info.title ?? ''}"
+                   class="layui-input">
+        </div>
+        <div class="layui-form-mid layui-word-aux">输入行为名称</div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">配置类型</label>
+        <div class="layui-input-inline">
+            {php}$action_type=Config::get('config.action_type');{/php}
+            {notempty name='action_type'}
+            <select name="type">
+                {volist name="action_type" id="vo"}
+                    <option value="{$key}">{$vo}</option>
+                {/volist}
+                {/notempty}
+            </select>
+        </div>
+        <div class="layui-form-mid layui-word-aux">选择行为类型</div>
+    </div>
+
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">行为描述</label>
+        <div class="layui-input-block">
+            <textarea placeholder="输入行为描述" name="remark" rows="5"
+                      class="layui-textarea input-2x">{$info.remark ?? ''}</textarea>
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">行为规则</label>
+        <div class="layui-input-block">
+            <textarea placeholder="输入行为规则，不写则只记录日志" name="rule" rows="4"
+                      class="layui-textarea input-2x">{$info.rule ?? ''}</textarea>
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">日志规则</label>
+        <div class="layui-input-block">
+            <textarea placeholder="记录日志备注时按此规则来生成，支持[变量|函数]。目前变量有：user,time,model,record,data" name="log" rows="4"
+                      class="layui-textarea input-2x">{$info.log ?? ''}</textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <input type="hidden" name="id" value="{$info.id ?? ''}">
+            <button class="layui-btn" lay-submit="" lay-filter="action">立即提交</button>
+            <button class="layui-btn layui-btn-primary retreat">取消</button>
+        </div>
+    </div>
+</form>
+{/block}
+{block name="script"}
+<script type="text/javascript">
+    UrlHighlight("{:Url::build('Action/index')}");
+    '{present name="info.id"}'
+    setChoose("type", "{$info->getData('type') ?? 0}");
+    '{/present}'
+    //监听提交
+    layui.use(['jquery', 'form', 'layer'], function () {
+        layui.form.verify({
+            name:function (value) {
+                var pattern = /^[A-Za-z_]+$/;
+                if(!pattern.test(value)){
+                    return '必须是字母数字或下划线';
+                }
+            }
+        });
+        layui.form.on('submit(action)', function (data) {
+            layui.$.post(data.form.action, data.field, function (info) {
+                status_load(info, data.elem);
+            })
+            return false;
+        });
+    })
+</script>
+{/block}

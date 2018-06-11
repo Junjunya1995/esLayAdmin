@@ -1,0 +1,98 @@
+{extend name="base:base" /}
+
+{block name="body"}
+<div class="layui-btn-group">
+    <a class="layui-btn layui-btn-sm layui-btn-normal" href="{:Url::build('edit')}">增加</a>
+    <button class="layui-btn layui-btn-sm layui-btn-warm ajax-post" url="{:Url::build('batchUpdate',['value'=>1])}">启用</button>
+    <button class="layui-btn layui-btn-sm layui-btn-warm ajax-post" url="{:Url::build('batchUpdate',['value'=>0])}">禁用</button>
+    <button class="layui-btn layui-btn-sm layui-btn-danger ajax-post" url="{:Url::build('batchUpdate',['value'=>-1])}">删除</button>
+</div>
+
+<table class="layui-hide" id="notice" lay-filter="notice"></table>
+{/block}
+{block name="script"}
+<script type="text/html" id="statusTpl">
+    {{#  if(d.status == 1){return "启用"; } else {return "禁用";} }}
+</script>
+<script type="text/html" id="typeTpl">
+    {{#
+        var array=new Array("前后台","前台","后台");
+        return array[d.type];
+    }}
+</script>
+<script type="text/html" id="operating">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">详细</a>
+    <a class="layui-btn layui-btn-xs" lay-event="status">更改状态</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">删除</a>
+</script>
+<script type="text/javascript">
+    UrlHighlight("{:Url::build('Notice/index')}");
+    layui.use(['table', 'layer'], function () {
+        table_reload = layui.table.render({
+            elem: '#notice',
+            url: "{:Url::build('Notice/noticeJson')}",
+            page: true,
+            method: 'post',
+            limit: 10,
+            id: "ids",
+            loading: false,
+            cols: [[ //标题栏
+                {checkbox: true},
+                {field: 'id', title: 'ID', width: 100},
+                {field: 'title', title: '标题', width: 300},
+                {field: 'type', title: '公告区域', width: 150,templet: '#typeTpl'},
+                {field: 'description', title: '描述', width: 500},
+                {field: 'create_time', title: '创建时间', width: 200},
+                {field: 'status', title: '状态', width: 150, templet: '#statusTpl'},
+                {fixed: 'right', title: '操作', align: 'center', width: 200, toolbar: '#operating'},
+            ]]
+        });
+
+        //监听工具条
+        layui.table.on('tool(notice)', function (obj) {
+            switch (obj.event) {
+                case "status":
+                    layui.layer.confirm('确定执行该操作吗?', function (index) {
+                        layui.layer.close(index);
+                        layui.$.post("{:Url::build('setStatus')}", {
+                            value: Math.abs(obj.data.status - 1),
+                            ids: obj.data.id
+                        }, function (data) {
+                            if (data.code !== 1) {
+                                return alert_msg(data.msg, 0)
+                            };
+                            alert_msg(data.msg, 1);
+                            setTimeout(function () {
+                                table_reload.reload();
+                            }, 1500);
+                        });
+                    });
+                    break;
+                case 'delete':
+                    layui.layer.confirm('确定执行该操作吗?', function (index) {
+                        layui.layer.close(index);
+                        layui.$.post("{:Url::build('setStatus')}", {
+                            value: -1,
+                            ids: obj.data.id
+                        }, function (data) {
+                            if (data.code !== 1) {
+                                return alert_msg(data.msg, 0)
+                            };
+                            alert_msg(data.msg, 1);
+                            setTimeout(function () {
+                                table_reload.reload();
+                            }, 1500);
+                        });
+                    });
+                    break;
+                case 'detail':
+                    window.location.href = createURL("{:Url::build('edit')}", {id: obj.data.id});
+                    break;
+                default:
+                    layui.layer.msg('噢，天啊！你点了什么？');
+                    break;
+            }
+        });
+    });
+</script>
+{/block}

@@ -71,16 +71,15 @@ class Admin extends ControllerEX
         if ($this->requestex()->isAjax()) { //ajax 跳过
             return false;
         }
-//        $controller = strtolower($this->app->request->controller());//当前的控制器名
-//        if ($controller=="admin"){
-//            return $this->error("未授权访问");
-//        }
+
+
         $menus = $this->session()->get('admin_meun_list');
         if ($menus) {
-            return $menus;
+            //return $menus;
         }
-//        $module = strtolower($this->app->request->module());//当前的模块名
-//        $action = strtolower($this->app->request->action());//当前的操作名
+        $controller = strtolower($this->getControllerName());//当前的控制器名
+        $action = strtolower($this->getActionName());//当前的操作名
+        $url = "{$controller}/{$action}";
         $where = [
             ['pid', '=', 0],
             ['hide', '=', 0],
@@ -97,39 +96,89 @@ class Admin extends ControllerEX
 //                unset($menus['main'][$key]);
 //                continue; //继续循环
 //            }
-            //"{$controller}/{$action}" == $item['url'] ? $menus['main'][$key]['class'] = 'layui-this' : null;
+            $url  == $item['url'] ? $menus['main'][$key]['class'] = 'layui-this' : null;
         }
         $map = [
             ['pid', '<>', 0],
             ['hide', '=', 0],
             ['status', '<>', -1],
-            //['url' ,'=', ""]
+            ['url' ,'=', $url]
         ]; // 查找当前子菜单
-//        $pid = Db::name("menu")->where($map)->value('pid');
-//        if ($pid) {
-//            $tmp_pid = Db::name("menu")->field('id,pid')->find($pid);
-//            $nav = $tmp_pid['pid'] ? Db::name("menu")->field('id,pid')->find($tmp_pid['pid']) : $tmp_pid; // 查找当前主菜单
-//            foreach ($menus['main'] as $key => $item) {
-//                if ((int)$item['id'] === (int)$nav['id']) {// 获取当前主菜单的子菜单项
-//                    $menus['main'][$key]['class'] = 'layui-this';
-//                    $groups = Db::name("menu")->where([['group','<>', ''], ['pid' ,'=', $item['id']]])->distinct(true)->column("group"); //生成child树
-//                    $second_urls = Db::name("menu")->where('pid',$item['id'])->field('id,url')->select() ?: []; //获取二级分类的合法url
-//                    $to_check_urls = $this->toCheckUrl($second_urls); // 检测菜单权限
-//                    foreach ($groups as $g) {// 按照分组生成子菜单树
-//                        $where=[['pid','=',$item['id']],['group','=',$g]];
-//                        if (isset($to_check_urls) && !empty($to_check_urls)) {
-//                            $where[] = ['url','in', $to_check_urls];
-//                        }
-//                        $menuList = Db::name("menu")->where($where)->field('id,pid,title,url,tip')->order('sort asc')->select();
-//                        $menus['child'][$g] = list_to_tree($menuList, 'id', 'pid', 'operater', $item['id']);
-//                    }
-//                }
-//            }
-//        }
+        $pid = Db::name("menu")->where($map)->value('pid');
+
+        if ($pid) {
+            $tmp_pid = Db::name("menu")->field('id,pid')->find($pid);
+            $nav = $tmp_pid['pid'] ? Db::name("menu")->field('id,pid')->find($tmp_pid['pid']) : $tmp_pid; // 查找当前主菜单
+            foreach ($menus['main'] as $key => $item) {
+                if ((int)$item['id'] === (int)$nav['id']) {// 获取当前主菜单的子菜单项
+                    $menus['main'][$key]['class'] = 'layui-this';
+                    $groups = Db::name("menu")->where([['group','<>', ''], ['pid' ,'=', $item['id']]])->distinct(true)->column("group"); //生成child树
+                    $second_urls = Db::name("menu")->where('pid',$item['id'])->field('id,url')->select() ?: []; //获取二级分类的合法url
+                    $to_check_urls = $this->toCheckUrl($second_urls); // 检测菜单权限
+                    foreach ($groups as $g) {// 按照分组生成子菜单树
+                        $where=[['pid','=',$item['id']],['group','=',$g]];
+                        //if (isset($to_check_urls) && !empty($to_check_urls)) {
+                            $where[] = ['url','in', $to_check_urls];
+                        //}
+                        $menuList = Db::name("menu")->where($where)->field('id,pid,title,url,tip')->order('sort asc')->select();
+                        $menus['child'][$g] = list_to_tree($menuList, 'id', 'pid', 'operater', $item['id']);
+                    }
+                }
+            }
+        }
 
         $this->session()->set('admin_meun_list', $menus);
 
         return $menus;
+
+    }
+
+    /**
+     * 非超级管理员的权限检测
+     * @param array $second_urls
+     * @author staitc7 <static7@qq.com>
+     * @return mixed
+     */
+    private function toCheckUrl(array $second_urls = []) {
+//        // 检测菜单权限
+//        if (empty(UserInfo::userId())) {
+//            return null;
+//        }
+        //$module = $this->app->request->module();
+        $to_check_urls = [];
+        if (empty($second_urls)){
+            return null;
+        }
+        foreach ($second_urls as $key => $to_check_url) {
+                $rule = $to_check_url['url'];
+            //if ($this->checkRule($rule, $this->app->config->get('config.auth_rule.rule_url'), null)) {
+                $to_check_urls[] = $to_check_url['url'];
+            //}
+        }
+        return empty($to_check_urls) ? null : $to_check_urls;
+    }
+    /**
+     * 权限检测
+     * @param string $rule 检测的规则
+     * @param null $type
+     * @param string $mode check模式
+     * @return bool
+     * @author 朱亚杰  <xcoolcc@gmail.com>
+     */
+    final private function checkRule($rule, $type = null, $mode = 'url') {
+        static $Auth_static = null;
+        $Auth = $Auth_static ?? new Auth();
+        $type = $type ? $type : $this->app->config->get('config.auth_rule.rule_url');
+        if (!$Auth->check($rule, UserInfo::userId(), $type, $mode)) {
+            return false;
+        }
+        return true;
+    }
+
+    public function actionNotFound($action): void
+    {
+        parent::actionNotFound($action); // TODO: Change the autogenerated stub
+        $this->dump('404');
 
     }
 }

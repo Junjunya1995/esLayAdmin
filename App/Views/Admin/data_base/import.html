@@ -1,0 +1,78 @@
+{extend name="base:base" /}
+{block name="body"}
+
+<table class="layui-table" lay-skin="line">
+    <colgroup>
+        <col width="10%">
+        <col width="5%">
+        <col width="5%">
+        <col width="20%">
+        <col width="20%">
+        <col width="20%">
+        <col width="20%">
+    </colgroup>
+    <thead>
+    <tr>
+        <th>备份名称</th>
+        <th>卷数</th>
+        <th>压缩</th>
+        <th>数据大小</th>
+        <th>备份时间</th>
+        <th>状态</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {notempty name="data"}
+    {volist name="data" id="vo"}
+    <tr>
+        <td>{$vo.time|date='Ymd-His'}</td>
+        <td>{$vo.part}</td>
+        <td>{$vo.compress}</td>
+        <td>{$vo.size|format_bytes}</td>
+        <td>{$key}</td>
+        <td>-</td>
+        <td>
+            <a title="还原" class="db-import" href="{:Url::build('revert',['time'=>$vo['time']])}">还原</a>
+            <a class="special confirm" title="删除" href="{:Url::build('del',['time'=>$vo['time']])}">删除</a>
+        </td>
+    </tr>
+    {/volist}
+    {else /}
+    <td colspan="7" class="text-center"> aOh! 暂时还没有内容! </td>
+    {/notempty}
+    </tbody>
+</table>
+{/block}
+{block name="script"}
+<script type="text/javascript">
+    UrlHighlight("{:Url::build('DataBase/import')}");
+    layui.use(['jquery', 'form'], function () {
+        layui.$(".db-import").click(function () {
+            var self = this, status = ".";
+            layui.$.get(self.href, success, "json");
+            window.onbeforeunload = function () {
+                return "正在还原数据库，请不要关闭！";
+            };
+            return false;
+            function success(data) {
+                if (data.code!=1) {
+                    window.onbeforeunload = function () {return null;};
+                    return alert_msg(data.msg, 0);
+                }
+                if (data.data.gz) {
+                    data.msg += status;
+                    if (status.length === 5) {status = ".";} else {status += ".";}
+                }
+                layui.$(self).parent().prev().text(data.msg);
+                if (data.data.part) {
+                    layui.$.get(self.href, {"part": data.data.part, "start": data.data.start}, success, "json");
+                } else {
+                    window.onbeforeunload = function () {return null;};
+                }
+            }
+        });
+    });
+</script>
+
+{/block}

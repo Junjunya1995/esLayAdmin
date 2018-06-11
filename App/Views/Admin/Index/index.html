@@ -1,0 +1,52 @@
+{extend name="Admin/base:base" /}
+
+{block name="body"}
+<style>
+    .layui-body {left: 0px;}
+</style>
+<div class="layui-row">
+    <div class="layui-col-xs12 layui-col-md8">
+        <div class="pr-10 ">
+            <fieldset class="layui-elem-field layui-field-title">
+                <legend>欢迎登录 Static7基础管理系统</legend>
+            </fieldset>
+            <blockquote class="layui-elem-quote layui-quote-nm">
+                <p style="color: #0f88eb;font-size: 18px;">
+                    开发这个基础系统的初衷:是想帮助解决,后台基础管理系统<span style="color: orangered;">定制化开发</span>的问题. <br>
+                    <span style="color: orangered;">定制化开发讲究对代码的质量要求,代码扩展性和阅读性</span>.有了稳健基础,需求定制化模块或者功能更容易. <br>
+                    Layui 2.x前端框架,颜色设计感很棒，清新而不乏深沉，互相柔和，不过分刺激大脑皮层的神经反应，形成越久越耐看的微妙影像。合理搭配，可与各式各样的网站避免违和，从而使你的Web平台看上去更为融洽。<br>
+                    ThinkPHP 是一个很不错的框架. 开发这个基础系统的时候,采用ThinkPHP5.1版本<br>
+                </p>
+            </blockquote>
+            {notempty name=":stristr('123','rc')"}
+            <blockquote class="layui-elem-quote layui-quote-nm">
+                <p style="color: red;font-size: 18px;">
+                    目前ThinkPHP5.1版本尚处于RC阶段，仅供学习参考，请勿用于商业项目！<br>
+                    ThinkPHP5.1 还在RC阶段,离正式发布还有一段时间,我也会根据框架的调整作出相应调整.
+                </p>
+            </blockquote>
+            {/notempty}
+        </div>
+    </div>
+    <div class="layui-col-xs6 layui-col-md4">
+        <div class=" pl-10">
+            <fieldset class="layui-elem-field layui-field-title">
+                <legend>系统信息</legend>
+                <div class="layui-field-box ">
+
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="left"}{/block}
+{block name="footer"}
+<footer class=" layui-footer footer" style="left: 0px;">
+    <div class="layui-main ">
+        <p class="layui-center">
+            <strong>Copyright</strong> static7 &copy; 2017
+        </p>
+    </div>
+</footer>
+{/block}

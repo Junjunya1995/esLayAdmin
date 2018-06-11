@@ -1,0 +1,85 @@
+{extend name="base:base" /}
+
+{block name="body"}
+<div class="layui-btn-group">
+    <a class="layui-btn layui-btn-sm layui-btn-normal ajax-get confirm" href="{:Url::build('Action/clear')}">清空</a>
+    <button class="layui-btn layui-btn-sm layui-btn-danger ajax-post confirm" url="{:Url::build('Action/remove')}">
+        删除
+    </button>
+</div>
+<table class="layui-hide" id="action_log" lay-filter="action_log"></table>
+
+{/block}
+{block name="script"}
+<script type="text/html" id="statusTpl">
+    {{#  if(d.status == 1){return "正常"; } else {return "禁用";} }}
+</script>
+<script type="text/html" id="operating">
+    <!--<a class="layui-btn layui-btn-xs" lay-event="status">更改状态</a>-->
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">详细</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">删除</a>
+</script>
+<script type="text/javascript">
+    UrlHighlight("{:Url::build('Action/actionLog')}");
+    layui.use(['table', 'layer'], function () {
+        table_reload = layui.table.render({
+            elem: '#action_log',
+            url: "{:Url::build('Action/actionLogJson')}",
+            page: true,
+            method: 'post',
+            limit: 10,
+            id: "ids",
+            loading: false,
+            cols: [[ //标题栏
+                {checkbox: true},
+                {field: 'id', title: '编号'},
+                {field: 'action_id', title: '行为名称'},
+                {field: 'user_id', title: '执行者'},
+                {field: 'type', title: '执行操作'},
+                {field: 'action_ip', title: 'ip'},
+                {field: 'create_time', title: '执行时间'},
+                {field: 'status', title: '状态', width: 200, templet: '#statusTpl'},
+                {fixed: 'right', title: '操作', align: 'center', width: 200, toolbar: '#operating'},
+            ]]
+        });
+        //监听工具条
+        layui.table.on('tool(action_log)', function (obj) {
+            switch (obj.event) {
+                case 'delete':
+                    layui.layer.confirm('真的删除行么', function (index) {
+                        obj.del(); //删除对应行（tr）的DOM结构
+                        layui.layer.close(index);
+                        //向服务端发送删除指令
+                        layui.$.post("{:Url::build('remove')}", {ids: obj.data.id}, function (data) {
+                            if (data.code !== 1) {
+                                return alert_msg(data.msg, 0)
+                            }
+                            alert_msg(data.msg, 1);
+                            setTimeout(function () {
+                                table_reload.reload();
+                            }, 1500);
+                        });
+                    });
+                    break;
+                case 'detail':
+//                    window.location.href = createURL("{:Url::build('detailed')}", {id: obj.data.id});
+                    layui.$.get("{:Url::build('detailed')}", {id: obj.data.id}, function (str) {
+                        if (str.code === 0) {
+                            return alert_msg(str.msg);
+                        };
+                        pop_up =layui.layer.open({
+                            type: 1,
+                            title: "日志详情",
+                            area: '550px',
+                            content: str,
+                        });
+                    });
+                    break;
+                default:
+                    layui.layer.msg('噢，天啊！你点了什么？');
+                    break;
+            }
+        });
+    });
+</script>
+{/block}

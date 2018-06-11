@@ -157,7 +157,40 @@ function ucenter_md5($str, $key = '')
     $key = empty($key) ? 'F:x2d"<f)#s}DR$*7A|HU/4hgXLcGwoMKO(50p_b' : $key;
     return (string)$str === '' ? '' : md5(sha1($str) . $key);
 }
-
+/**
+ * 把返回的数据集转换成Tree
+ * @param array $list 要转换的数据集
+ * @param string $pk
+ * @param string $pid parent标记字段
+ * @param string $child level标记字段
+ * @param int $root 根
+ * @return array
+ * @author 麦当苗儿 <zuojiazi@vip.qq.com>
+ */
+function list_to_tree($list, $pk = 'id', $pid = 'pid', $child = '_child', $root = 0) {
+    // 创建Tree
+    $tree = [];
+    if (is_array($list)) {
+        // 创建基于主键的数组引用
+        $refer = [];
+        foreach ($list as $key => $data) {
+            $refer[$data[$pk]] = &$list[$key];
+        }
+        foreach ($list as $key => $data) {
+            // 判断是否存在parent
+            $parentId = $data[$pid];
+            if ($root == $parentId) {
+                $tree[] = &$list[$key];
+            } else {
+                if (isset($refer[$parentId])) {
+                    $parent = &$refer[$parentId];
+                    $parent[$child][] = &$list[$key];
+                }
+            }
+        }
+    }
+    return $tree;
+}
 /**
  * 数据签名认证
  * @param  array $data 被认证的数据
@@ -168,4 +201,24 @@ function data_auth_sign(array $data) {
     ksort($data); //排序
     $code = http_build_query($data); //url编码并生成query字符串
     return sha1($code);//生成签名
+}
+
+/**
+ *  分析枚举类型配置值
+ *  格式 a:名称1,b:名称2
+ * @param string $string 配置值
+ * @return array
+ */
+function parse_config_attr($string) {
+    $array = preg_split('/[,;\r\n]+/', trim($string, ",;\r\n"));
+    if (strpos($string, ':')) {
+        $value = [];
+        foreach ($array as $val) {
+            list($k, $v) = explode(':', $val);
+            $value[$k] = $v;
+        }
+    } else {
+        $value = $array;
+    }
+    return $value;
 }

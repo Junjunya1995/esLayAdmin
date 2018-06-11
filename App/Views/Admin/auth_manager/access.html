@@ -1,0 +1,77 @@
+{extend name="base:base" /}
+{block name="body"}
+<div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+    <ul class="layui-tab-title">
+        <li class="layui-this"><a href="{:Url::build('AuthManager/access',['group_id'=>$group_id])}">访问授权</a></li>
+        </li>
+        <li class=""><a href="{:Url::build('AuthManager/user',['group_id'=>$group_id])}">用户授权</a></li>
+    </ul>
+    <div class="layui-tab-content">
+        <div class="layui-tab-item layui-show">
+            <form action="{:Url::build('AuthManager/rulesArrayUpdate')}" method="post" class="">
+                {volist name="node_list" id="node" }
+                    <fieldset class="layui-elem-field all">
+                        <legend><label><input type="checkbox" class="auth_rules rules_all" name="rules[]" value="<?php echo $main_rules[$node['url']] ?>">{$node.title}</label></legend>
+                        {present name="node['child']"}
+                            {volist name="node['child']" id="child" }
+                            <div class="layui-field-box">
+                                <fieldset class="layui-elem-field rule_check">
+                                    <legend><label><input type="checkbox" class="auth_rules rules_row " name="rules[]" value="<?php echo $auth_rules[$child['url']] ?>">{$child.title}</label></legend>
+                                        {notempty name="child['operator']"}
+                                            <div class="layui-field-box child_row">
+                                                {volist name="child['operator']" id="op"}
+                                                <label><input type="checkbox" class="auth_rules" name="rules[]" value="<?php echo $auth_rules[$op['url']] ?>">{$op.title}</label>
+                                                {/volist}
+                                            </div>
+                                        {else /}
+                                            <legend>&nbsp;</legend>
+                                        {/notempty}
+                                </fieldset>
+                            </div>
+                            {/volist}
+                        {else /}
+                            <legend>&nbsp;</legend>
+                        {/present}
+                    </fieldset>
+                {/volist}
+                <div class="layui-inline">
+                    <input type="hidden" name="id" value="{$this_group.id ?? ''}" />
+                    <button class="layui-btn" type="submit" id="access">确定</button>
+                    <button class="layui-btn layui-btn-primary retreat">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="script"}
+<script type="text/javascript">
+    UrlHighlight("{:Url::build('AuthManager/index')}");
+    //监听提交
+    layui.use(['jquery', 'form', 'layer'], function () {
+        var rules = [{$this_group.rules}];
+        layui.$('.auth_rules').each(function () {
+            if (layui.$.inArray(parseInt(this.value, 10), rules) > -1) {
+                layui.$(this).prop('checked', true);
+            }
+        });
+        //全选节点
+        layui.$('.rules_all').on('change', function () {
+            layui.$(this).closest('.all').find('.rule_check').find('input').prop('checked', this.checked);
+        });
+        layui.$('.rules_row').on('change', function () {
+            layui.$(this).closest('.rule_check').find('.child_row').find('input').prop('checked', this.checked);
+        });
+
+        layui.$("form").submit(function () {
+            var self = layui.$(this);
+            layui.$("#access").prop('disabled', true);
+            layui.$.post(self.attr("action"), self.serialize(), function (data) {
+                status_load(data,"#access");
+            });
+            return false;
+        });
+
+    })
+</script>
+{/block}

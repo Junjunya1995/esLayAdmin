@@ -13,6 +13,7 @@ class Member extends Admin
 {
     public function index()
     {
+       // $this->dump($this->getMenus());
         $this->fetch();
     }
 }

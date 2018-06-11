@@ -1,0 +1,80 @@
+{extend name="base:base" /}
+{block name="css"}<style>.layui-row legend{color: #b1afaf;}</style>{/block}
+{block name="body"}
+<div class="layui-row">
+    <div class="layui-col-xs12 layui-col-md5">
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>会员资料</legend>
+        </fieldset>
+
+        <fieldset class="layui-elem-field">
+            <legend>用户ID</legend>
+            <div class="layui-field-box">
+                {$info.uid ?? ''}
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field">
+            <legend>昵称</legend>
+            <div class="layui-field-box">
+                {$info.nickname ?? ''}
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field">
+            <legend>性别</legend>
+            <div class="layui-field-box">
+                {$info.sex|change_status=['男','女']}
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field">
+            <legend>生日</legend>
+            <div class="layui-field-box">
+                {$info.birthday ?? ''}
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field">
+            <legend>QQ</legend>
+            <div class="layui-field-box">
+                {$info.qq ?? ''}
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field">
+            <legend>注册IP</legend>
+            <div class="layui-field-box">
+                {$info.reg_ip|long2ip}
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field">
+            <legend>注册时间</legend>
+            <div class="layui-field-box">
+                {$info.reg_time|time_format}
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field">
+            <legend>最后登录时间</legend>
+            <div class="layui-field-box">
+                {$info.last_login_time}
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field">
+            <legend>最后登录IP</legend>
+            <div class="layui-field-box">
+                {$info.last_login_time}
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field">
+            <legend>状态</legend>
+            <div class="layui-field-box">
+                {$info.status|change_status=['禁用','正常']}
+            </div>
+        </fieldset>
+        <div class="layui-form-item">
+                <button class="layui-btn layui-btn-primary retreat">取消</button>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="script"}
+<script type="text/javascript">
+    UrlHighlight("{:Url::build('Member/index')}");
+</script>
+{/block}

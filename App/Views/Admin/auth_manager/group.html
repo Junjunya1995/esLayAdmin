@@ -1,0 +1,43 @@
+<form class="layui-form" method="post" action="{:Url::build('AuthManager/userToGroup')}">
+    <div class="layui-form-item" pane="">
+        <label class="layui-form-label">组别:</label>
+        <div class="layui-input-block">
+            {volist name="auth_groups" id="vo"}
+            <input class="auth_groups" type="checkbox" name="group_id[{$key}]" lay-skin="primary" title="{$vo.title}(编号:{$vo.id})" value="{$vo.id}">
+            <br>
+            {/volist}
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <input type="hidden" name="uid" value="{$user_id ?? 0}"/>
+            <button class="layui-btn" type="submit" lay-submit="group" lay-filter="group">立即提交</button>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    layui.use(['form','jquery','layer'], function(){
+        var group = [{$user_groups}];
+        layui.$('.auth_groups').each(function () {
+            if (layui.$.inArray(parseInt(this.value, 10), group) > -1) {
+                layui.$(this).prop('checked', true);
+            };
+        });
+        layui.form.render();
+        //监听提交
+        layui.form.on('submit(group)', function(form){
+            layui.$.post(form.form.action, form.field, function (data) {
+                if (data.code !== 1) {
+                    return alert_msg(data.msg, 0)
+                };
+                alert_msg(data.msg, 1);
+                setTimeout(function () {
+                    layui.layer.close(pop_up);
+                    table_reload.reload();
+                }, 1500);
+
+            });
+            return false;
+        });
+    });
+</script>

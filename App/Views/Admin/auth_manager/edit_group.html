@@ -1,0 +1,41 @@
+<form class="layui-form m15" method="post" action="{:Url::build('AuthManager/writeGroup')}">
+    <div class="layui-form-item" pane="">
+        <label class="layui-form-label">标题</label>
+        <div class="layui-input-inline">
+            <input type="text" name="title" lay-verify="required" lay-verify="title" autocomplete="off"
+                   placeholder="用于显示标题" value="{$info.title ?? ''}"
+                   class="layui-input">
+        </div>
+        <div class="layui-form-mid layui-word-aux">用于显示标题</div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">说明</label>
+        <div class="layui-input-block">
+            <textarea placeholder="详细说明" name="description" rows="4" class="layui-textarea input-6x">{$info.description ?? ''}</textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <input type="hidden" name="id" value="{$info.id ?? 0}">
+            <button class="layui-btn" lay-submit="" lay-filter="edit_group">立即提交</button>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    layui.use(['jquery','form'],function () {
+        layui.form.on('submit(edit_group)', function (info) {
+            layui.$.post(info.form.action, info.field, function (data) {
+                if (data.code !== 1) {
+                    return alert_msg(data.msg, 0)
+                };
+                alert_msg(data.msg, 1);
+                setTimeout(function () {
+                    layui.layer.close(pop_up);
+                    table_reload.reload();
+                }, 1500);
+            })
+            return false;
+        });
+    })
+</script>
