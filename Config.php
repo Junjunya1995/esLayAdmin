@@ -63,6 +63,11 @@ return [
         'prefix'          => 'tp5_',
         // 是否需要断线重连
         'break_reconnect' => true,
+        'paginate' => [
+            'type'     => 'bootstrap',
+            'var_page'  => 'page',
+            'list_rows' => 15,
+        ]
     ]
 
 ];
