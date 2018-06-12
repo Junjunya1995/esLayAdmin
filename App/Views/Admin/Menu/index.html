@@ -1,0 +1,170 @@
+{extend name="Admin/base:base" /}
+{block name="body"}
+<div class="layui-btn-group">
+    <a class="layui-btn layui-btn-sm layui-btn-normal" href="">增加</a>
+    <button class="layui-btn layui-btn-sm layui-btn-danger ajax-post confirm"
+            url="" target-form="ids">删除
+    </button>
+    {present name='father'}
+    <a class="layui-btn layui-btn-sm layui-btn-normal"
+       href="">返回{$father.title ?? ''}</a>
+    {/present}
+</div>
+
+<table class="layui-hide" id="menu" lay-filter="menu"></table>
+{/block}
+{block name="script"}
+<script type="text/html" id="statusTpl">
+    {{#  if(d.status == 1){ return "正常"; } else {return "禁用";} }}
+</script>
+<script type="text/html" id="isDev">
+    {{#  if(d.is_dev == 1){ }}
+        <a class="layui-btn layui-btn-xs" lay-event="isDev">是</a>
+    {{#  }else{ }}
+        <a class="layui-btn layui-btn-xs" lay-event="isDev">否</a>
+    {{# } }}
+</script>
+<script type="text/html" id="hide">
+    {{#  if(d.hide == 1){ }}
+        <a class="layui-btn layui-btn-xs" lay-event="hide">是</a>
+    {{#  }else{ }}
+        <a class="layui-btn layui-btn-xs" lay-event="hide">否</a>
+    {{# } }}
+</script>
+<script type="text/html" id="father">
+    {{#  return "{$father.title ?? '无'}"; }}
+</script>
+<script type="text/html" id="title">
+<a class="layui-btn layui-btn-xs layui-btn-primary" href="?pid={{d.id}}">{{ d.title }}</a>
+</script>
+<script type="text/html" id="operating">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="status">更改状态</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">删除</a>
+</script>
+<script type="text/javascript">
+    UrlHighlight("/admin/Menu/index");
+    layui.use(['jquery', 'form', 'table', 'layer'], function () {
+        table_reload = layui.table.render({
+            elem: '#menu',
+            url: "/admin/Menu/menuJson",
+            where: {pid: "{$pid ?? 0}"},
+            page: true,
+            method: 'post',
+            limit: 10,
+            id: "ids",
+            loading: false,
+            cols: [[ //table column
+                {checkbox: true},
+                {field: 'id', title: 'ID', width: 100},
+                {field: 'title', title: '名称', width: 280, templet: '#title'},
+                {field: 'father', title: '上级菜单', width: 150, templet: '#father'},
+                {field: 'group', title: '分组', width: 150},
+                {field: 'url', title: 'URL', width: 300},
+                {field: 'sort', title: '排序', width: 80, edit: 'text'},
+                {field: 'is_dev', title: '仅开发者模式显示', width: 150, templet: '#isDev'},
+                {field: 'hide', title: '隐藏', width: 80,templet: '#hide'},
+                {field: 'status', title: '状态', width: 100, templet: '#statusTpl'},
+                {fixed: 'right', title: '操作', align: 'center', width: 200, toolbar: '#operating'},
+            ]]
+        });
+
+        layui.table.on('tool(menu)', function (obj) {
+            switch (obj.event) {
+                case "status":
+                    layui.layer.confirm('确定执行该操作吗?', function (index) {
+                        layui.layer.close(index);
+                        layui.$.post("", {
+                            value: Math.abs(obj.data.status - 1),
+                            ids: obj.data.id
+                        }, function (data) {
+                            if (data.code !== 1) {
+                                return alert_msg(data.msg, 0)
+                            }
+                            ;
+                            alert_msg(data.msg, 1);
+                            setTimeout(function () {
+                                table_reload.reload();
+                            }, 1500);
+                        });
+                    });
+                    break;
+                case 'delete':
+                    layui.layer.confirm('确定执行该操作吗?', function (index) {
+                        obj.del();
+                        layui.layer.close(index);
+                        layui.$.post("", {
+                            value: -1,
+                            ids: obj.data.id
+                        }, function (data) {
+                            if (data.code !== 1) {
+                                return alert_msg(data.msg, 0)
+                            }
+                            alert_msg(data.msg, 1);
+                            setTimeout(function () {
+                                table_reload.reload();
+                            }, 1500);
+                        });
+                    });
+                    break;
+                case 'edit':
+                    window.location.href = createURL("", {id: obj.data.id});
+                    break;
+                case 'isDev':
+                        layui.$.post("", {
+                            ids: obj.data.id,
+                            value: Math.abs(obj.data.is_dev - 1),
+                            field:'is_dev'
+                        }, function (data) {
+                            if (data.code !== 1) {
+                                return alert_msg(data.msg, 0)
+                            }
+                            ;
+                            alert_msg(data.msg, 1);
+                            setTimeout(function () {
+                                table_reload.reload();
+                            }, 1500);
+                        });
+                    break;
+                case 'hide':
+                    layui.$.post("", {
+                        ids: obj.data.id,
+                        value: Math.abs(obj.data.hide - 1),
+                        field:'hide'
+                    }, function (data) {
+                        if (data.code !== 1) {
+                            return alert_msg(data.msg, 0)
+                        }
+                        ;
+                        alert_msg(data.msg, 1);
+                        setTimeout(function () {
+                            table_reload.reload();
+                        }, 1500);
+                    });
+                    break;
+                default:
+                    layui.layer.msg('噢，天啊！你点了什么？');
+                    break;
+            }
+        });
+
+        layui.table.on('edit(menu)', function (obj) {
+            var sort = obj.value;
+            if (isNaN(sort)) {
+                alert_msg('排序必须为一个数字', 0);
+                return false;
+            }
+            layui.$.get("", {id: obj.data.id, sort: sort}, function (data) {
+                if (data.code !== 1) {
+                    return alert_msg(data.msg, 0)
+                }
+                alert_msg(data.msg, 1);
+                setTimeout(function () {
+                    table_reload.reload();
+                }, 1500);
+            });
+        });
+    })
+</script>
+
+{/block}
