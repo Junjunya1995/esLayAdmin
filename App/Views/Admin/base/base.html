@@ -53,8 +53,7 @@
                             <a class="" href="javascript:;">{$key}</a>
                             <dl class="layui-nav-child">
                                 {volist name='child' id='v'}
-                                <dd><a href="javascript:void(0);" class="" data-url="/{$v['url']?? '#'}">{$v.title ??
-                                    ''}</a></dd>
+                                <dd><a href="javascript:void(0);" class="" data-url="/{$v['url']?? '#'}">{$v.title ?? ''}</a></dd>
                                 {/volist}
                             </dl>
                         </li>
@@ -84,8 +83,10 @@
 <script type="text/javascript">
     layui.use(['element', 'jquery'], function () {
         layui.element.on('nav(left_url)', function (elem) {
-            layui.layer.load(2);
-            window.location.href = elem[0].getAttribute('data-url')
+            if (elem[0].getAttribute('data-url') ) {
+                layui.layer.load(2);
+                window.location.href = elem[0].getAttribute('data-url')
+            }
         });
         layui.$('.personal').on('click',function () {
             layui.$.get(this.href, function (str) {
