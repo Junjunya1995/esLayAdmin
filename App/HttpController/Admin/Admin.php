@@ -34,18 +34,11 @@ class Admin extends ControllerEX
      * @throws \think\db\exception\ModelNotFoundException
      */
     protected function onRequest($action):?bool {
+        parent::onRequest($action);
 
         if ($this->isLogin() === 0) {
             $this->response()->redirect('/admin/login/index');
         }
-
-        $this->view = new Template();
-        $tempPath   = Config::getInstance()->getConf('TEMP_DIR');     # 临时文件目录
-        $tempConf   = Config::getInstance()->getConf('TEMPLATE');
-        $this->view->config([
-            'cache_path' => "{$tempPath}/templates_c/",               # 模板编译目录
-        ]);
-        $this->view->config($tempConf);
 
         if ($this->requestex()->isGet()) {
             $this->assign('systemMenus', $this->getMenus());

@@ -108,7 +108,7 @@
                     });
                     break;
                 case 'edit':
-                    window.location.href = createURL("", {id: obj.data.id});
+                    window.location.href = createURL("/admin/menu/edit", {id: obj.data.id});
                     break;
                 case 'isDev':
                         layui.$.post("", {

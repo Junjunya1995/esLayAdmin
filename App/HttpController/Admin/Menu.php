@@ -8,7 +8,8 @@
 namespace  App\HttpController\Admin;
 
 
-use app\common\facade\Tree;
+use Lib\Tree;
+use think\db\exception\ModelNotFoundException;
 
 class Menu extends  Admin {
 
@@ -21,14 +22,18 @@ class Menu extends  Admin {
 
     public function index($pid = 0)
     {
-        $father = $this->model('MenuModel')->father($pid); //查询父级ID
+        $father = null;
+        try {
+            $father = $this->model('MenuModel')->father($pid);
+        } catch (ModelNotFoundException $e) {
+        } //查询父级ID
 //        return $this->setView([
 //            'pid' => $pid,
 //            'father' => $father ?: null,
 //            'metaTitle' => '菜单列表'
 //        ]);
         $this->assign('pid',$pid);
-        $this->assign('father',$father);
+        $this->assign('father',$father ?: null);
         $this->fetch();
 
     }
@@ -47,7 +52,14 @@ class Menu extends  Admin {
             ['status', '<>', -1],
             ['pid', '=', (int)$pid ?: 0]
         ];
-        $data = $this->model('MenuModel')->listsJson($map, null, 'sort asc,id asc', (int)$page ?: 1, $limit);
+        $data = [];
+        try {
+            $data = $this->model('MenuModel')
+                ->listsJson($map, null, 'sort asc,id asc', (int)$page ?: 1, $limit);
+        } catch (ModelNotFoundException $e) {
+
+        }
+
         return $this->layuiJson($data);
     }
 
@@ -92,13 +104,13 @@ class Menu extends  Admin {
      */
 
     public function renew() {
-        $Menu =$this->app->model('Menu');
-        $info = $Menu->renew();
+        $Menu =$this->model('MenuModel');
+        $info = $Menu->renew($this->request()->getParsedBody());
         if ($info===false) {
             return $this->error($Menu->getError());
         }
-        $this->app->session->delete('menu');
-        return $this->success('操作成功', $this->app->url->build('Menu/index', ['pid' => $info['pid'] ?: 0]));
+        $this->session()->set('menu', null);
+        return $this->success('操作成功', '/admin/Menu/index?pid=' . ($info['pid'] ?: 0));
     }
 
     /**
@@ -106,11 +118,13 @@ class Menu extends  Admin {
      * @param int $id 菜单ID
      * @author staitc7 <static7@qq.com>
      * @return mixed
+     * @throws ModelNotFoundException
      */
 
-    public function edit($id = 0)
+    public function edit()
     {
-        $Menu = $this->app->model('Menu');
+        $id = $this->request()->getQueryParam('id');
+        $Menu = $this->model('MenuModel');
         if ((int)$id > 0) {
             $info = $Menu->edit((int)$id);
         }
@@ -118,7 +132,8 @@ class Menu extends  Admin {
         if (is_array($menu_list_all)) {
             $tree = Tree::toFormatTree($menu_list_all);
         }
-        return $this->setView(['info' => $info, 'menus' => $tree, 'metaTitle' => '菜单详情']);
+
+        $this->fetch('',['info' => $info, 'menus' => $tree, 'metaTitle' => '菜单详情']);
     }
 
     /**

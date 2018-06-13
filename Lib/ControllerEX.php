@@ -20,18 +20,33 @@ use think\Template;
 class ControllerEX extends Controller
 {
 
-    protected $view;
+    protected  $view;
     private $session = null;
 
+    /**
+     * 相当于构造函数
+     * @param $action
+     * @return bool|null|void
+     */
+    protected function onRequest($action):?bool {
 
+        $this->view = new Template();
+        $tempPath   = Config::getInstance()->getConf('TEMP_DIR');     # 临时文件目录
+        $tempConf   = Config::getInstance()->getConf('TEMPLATE');
+        $this->view->config([
+            'cache_path' => "{$tempPath}/templates_c/",               # 模板编译目录
+        ]);
+        $this->view->config($tempConf);
+
+        return true;
+
+    }
     
 
     public function index()
     {
        return;
     }
-
-
 
     /**
      * 输出模板到页面

@@ -1,11 +1,11 @@
-{extend name="base:base" /}
+{extend name="Admin/base:base" /}
 {block name="body"}
 <fieldset class="layui-elem-field layui-field-title mt-15">
     <legend>{present name="info"}编辑{else /}新增{/present}菜单</legend>
 </fieldset>
 <div class="layui-row">
     <div class="layui-col-xs12 layui-col-md6">
-        <form class="layui-form" action="{:Url::build('renew')}" method="post">
+        <form class="layui-form" action="/admin/menu/renew" method="post">
             <div class="layui-form-item">
                 <label class="layui-form-label">标题</label>
                 <div class="layui-input-block">
@@ -95,7 +95,7 @@
 {/block}
 {block name="script"}
 <script type="text/javascript">
-    UrlHighlight("{:Url::build('Menu/index')}");
+    UrlHighlight('admin/menu/index');
     setChoose("pid", "{$info.pid ?? 0}");
     setChoose("hide", "{$info.hide ?? 0}");
     setChoose("is_dev", "{$info.is_dev ?? 0}");

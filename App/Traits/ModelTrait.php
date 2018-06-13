@@ -8,16 +8,15 @@
 
 namespace App\Traits;
 
-
 use EasySwoole\Config;
+use think\Validate;
 
 trait ModelTrait
 {
-//定义错误信息
+    //定义错误信息
     protected $error;
 
     /**
-     * @author staitc7
      * @param array $map 条件
      * @param string $field 字段
      * @param string $order 排序
@@ -26,7 +25,7 @@ trait ModelTrait
      */
     public function lists(array $map = [],  $field = '*', string $order = '', int $limit = 0)
     {
-        return $this::all(function ($query) use ($map, $field, $order, $limit) {
+        $object = $this::all(function ($query) use ($map, $field, $order, $limit) {
             $query->where($map ?: null)
                 ->field($field ?: '*')
                 ->order($order ?: $this->pk.' ASC')
@@ -54,7 +53,7 @@ trait ModelTrait
             ->paginate([
                 'page' => $page,
                 'query' => $query,
-                'list_rows' => $limit ?: Config::get('paginate.list_rows')
+                'list_rows' => $limit ?: 10
             ]);
         return $object ? array_merge($object->toArray(),['page'=>$object->render()]) : false;
     }
@@ -78,7 +77,7 @@ trait ModelTrait
             ->paginate([
                 'page' => $page,
                 'query' => $query,
-                'list_rows' => $limit ?: Config::get('paginate.list_rows')
+                'list_rows' => $limit ?: 10
             ]);
         return $object ? $object->toArray() : false;
     }
@@ -122,18 +121,17 @@ trait ModelTrait
      * @param array  $data 数据
      * @param bool   $rule 验证场景
      * @param string $pkId 主键
-     * @param string $validate_name 验证器类名
+     * @param string $validate 验证器类名
      * @return bool
      */
 
-    public function renew(array $data=null,bool $rule=false,string $pkId='',$validate_name='') {
-        if(empty($validate_name)){//获取验证器
-            $class_name=get_class();
-            $start=strrpos($class_name,'\\')+1;
-            $validate_name=substr($class_name,$start);
+    public function renew(array $data=null,bool $rule=false,string $pkId='',$validate='') {
+
+        if (empty($data) || !is_array($data)) {
+            return false;
         }
-        $data = (is_array($data) && !empty($data)) ? $data : Request::post();
-        $validate = App::validate($validate_name);
+
+        $validate = $this->getValidate($validate);
         $pk= $pkId ?: $this->pk;
         if($rule || isset($data[$pk])) {
             $validate->scene('edit');
@@ -151,16 +149,7 @@ trait ModelTrait
             $object = $this::create($data);
             $type   =  2;
         }
-        if ($object){
-            //执行行为
-            Hook::listen('user_behavior', [
-                'type' => $type,
-                'action' => 'current_renew',
-                'model' => __CLASS__,
-                'record_id' => $object->id,
-                'user_id' => UserInfo::userId()
-            ]);
-        }
+
         return $object ? $object->toArray() : false;
     }
 
@@ -199,5 +188,17 @@ trait ModelTrait
     public function getError()
     {
         return $this->error;
+    }
+
+
+    private function getValidate ($validate = '') :?Validate {
+        if(empty($validate_name)){//获取验证器
+            $class_name=get_class();
+            $start=strrpos($class_name,'\\')+1;
+            $validate=substr($class_name,$start, 4);
+            $validate = 'App\Validates\\' . $validate . 'Validate';
+        }
+
+        return new $validate();
     }
 }
