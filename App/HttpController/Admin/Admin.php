@@ -186,14 +186,17 @@ class Admin extends ControllerEX
      * @return Model
      * @throws ModelNotFoundException
      */
-    protected function model($model, $namespace = 'App\Models'):Model {
+    protected function model($model, $namespace = 'App\Models\Admin'):Model {
+        $namespaceInt = 'App\Models';
         if (empty($this->models[$model])) {
-            $model = $namespace . '\\' . $model;
-            if (class_exists($model)) {
-                $this->models[$model] = new $model();
+            if (class_exists($namespace . '\\' . $model)) {
+                $model = $namespace.'\\'.$model;
+            } else  if (class_exists($namespaceInt.'\\'.$model)){
+                $model = $namespaceInt.'\\'.$model;
             } else {
                 throw new ModelNotFoundException("类没有找到");
             }
+            $this->models[$model] = new $model();
         }
 
         return $this->models[$model];

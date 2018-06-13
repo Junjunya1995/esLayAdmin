@@ -1,11 +1,11 @@
-{extend name="base:base" /}
+{extend name="Admin/base:base" /}
 
 {block name="body"}
 <div class="layui-btn-group">
-    <a class="layui-btn layui-btn-sm layui-btn-normal editgroup" href="{:Url::build('AuthManager/editGroup')}">增加</a>
-    <button class="layui-btn layui-btn-sm layui-btn-warm ajax-post" url="{:Url::build('batchUpdate',['value'=>1])}" target-form="ids">启用</button>
-    <button class="layui-btn layui-btn-sm layui-btn-warm ajax-post " url="{:Url::build('batchUpdate',['value'=>0])}" target-form="ids" >禁用</button>
-    <button class="layui-btn layui-btn-sm layui-btn-danger ajax-post " url="{:Url::build('batchUpdate',['value'=>-1])}" target-form="ids">删除</button>
+    <a class="layui-btn layui-btn-sm layui-btn-normal editgroup" href="/admin/authManager/editGroup">增加</a>
+    <button class="layui-btn layui-btn-sm layui-btn-warm ajax-post" url="/admin/authManager/batchUpdate?value=1" target-form="ids">启用</button>
+    <button class="layui-btn layui-btn-sm layui-btn-warm ajax-post " url="/admin/authManager/batchUpdate?value=0" target-form="ids" >禁用</button>
+    <button class="layui-btn layui-btn-sm layui-btn-danger ajax-post " url="/admin/authManager/batchUpdate?value=-1" target-form="ids">删除</button>
 </div>
 
 <table class="layui-hide" id="auth" lay-filter="auth"></table>
@@ -24,11 +24,11 @@
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">删除</a>
 </script>
 <script type="text/javascript">
-    UrlHighlight("{:Url::build('AuthManager/index')}");
+    UrlHighlight("/admin/authManager/index");
     layui.use(['table', 'layer', 'jquery', 'form'],function () {
         table_reload = layui.table.render({
             elem: '#auth',
-            url: "{:Url::build('AuthManager/authJson')}",
+            url: "/admin/authManager/authJson",
             page: true,
             method: 'post',
             limit: 10,
@@ -36,11 +36,11 @@
             loading: false,
             cols: [[ //table column
                 {checkbox: true},
-                {field: 'id', title: 'ID', width: 100},
-                {field: 'title', title: '用户组', width: 200},
-                {field: 'description', title: '描述', width: 200},
-                {field: 'auth', title: '授权', width: 200,templet: '#competence'},
-                {field: 'status', title: '状态', width: 200, templet: '#statusTpl'},
+                {field: 'id', title: 'ID', width: 60},
+                {field: 'title', title: '用户组'},
+                {field: 'description', title: '描述'},
+                {field: 'auth', title: '授权', width: 200, templet: '#competence'},
+                {field: 'status', title: '状态', templet: '#statusTpl'},
                 {fixed: 'right', title: '操作', align: 'center', width: 200, toolbar: '#operating'},
             ]]
         });
@@ -51,7 +51,7 @@
                 case "status":
                     layui.layer.confirm('确定执行该操作吗?', function (index) {
                         layui.layer.close(index);
-                        layui.$.post("{:Url::build('setStatus')}", {
+                        layui.$.post("/admin/authManager/setStatus", {
                             value: Math.abs(obj.data.status - 1),
                             ids: obj.data.id
                         }, function (data) {
@@ -69,7 +69,7 @@
                     layui.layer.confirm('确定执行该操作吗?', function (index) {
                         obj.del();
                         layui.layer.close(index);
-                        layui.$.post("{:Url::build('setStatus')}", {
+                        layui.$.post("/admin/authManager/setStatus", {
                             value: -1,
                             ids: obj.data.id
                         }, function (data) {
@@ -84,7 +84,7 @@
                     });
                     break;
                 case 'edit':
-                    layui.$.get("{:Url::build('AuthManager/editGroup')}", {id: obj.data.id}, function (str) {
+                    layui.$.get("/admin/authManager/editGroup", {id: obj.data.id}, function (str) {
                         if (str.code === 0) {
                             return alert_msg(str.msg);
                         };
@@ -97,10 +97,10 @@
                     });
                     break;
                 case 'access':
-                    window.location.href = createURL("{:Url::build('AuthManager/access')}", {group_id: obj.data.id});
+                    window.location.href = createURL("/admin/authManager/access", {group_id: obj.data.id});
                     break;
                 case 'user':
-                    window.location.href = createURL("{:Url::build('AuthManager/user')}", {group_id: obj.data.id});
+                    window.location.href = createURL("/admin/authManager/user", {group_id: obj.data.id});
                     break;
                 default:
                     layui.layer.msg('噢，天啊！你点了什么？');

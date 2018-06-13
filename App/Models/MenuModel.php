@@ -58,5 +58,44 @@ class MenuModel extends Model
         return $object ? $object->toArray() : false;
     }
 
+    /**
+     * 返回后台节点数据
+     * @param boolean $tree 是否返回多维数组结构(生成菜单时用到),为false返回一维数组(生成权限节点时用到)
+     *                      注意,返回的主菜单节点数组中有'controller'元素,以供区分子节点和主节点
+     * @return array
+     * @throws ModelNotFoundException
+     * @author 朱亚杰 <xcoolcc@gmail.com>
+     */
+    final public function returnNodes($tree = true) {
+        static $tree_nodes = [];
+        if ($tree && !empty($tree_nodes[(int)$tree])) {
+            return $tree_nodes[$tree];
+        }
+        $model_name = 'admin'; //当前模块名称
+        if ($tree) {
+            $list = $this->menuField('id,pid,title,url,tip,hide');
+            foreach ($list as $key => $value) {
+                if (stripos($value['url'], $model_name) !== 0) {
+                    $list[$key]['url'] = "{$model_name}/{$value['url']}";
+                }
+            }
+            $nodes = list_to_tree($list, 'id', 'pid', 'operator', 0);
+            foreach ($nodes as $key => $value) {
+                if (!empty($value['operator'])) {
+                    $nodes[$key]['child'] = $value['operator'];
+                    unset($nodes[$key]['operator']);
+                }
+            }
+        } else {
+            $nodes = $this->menuField('title,url,tip,pid');
+            foreach ($nodes as $key => $value) {
+                if (stripos($value['url'], $model_name) !== 0) {
+                    $nodes[$key]['url'] = "{$model_name}/{$value['url']}";
+                }
+            }
+        }
+        $tree_nodes[(int)$tree] = $nodes;
+        return $nodes;
+    }
 
 }

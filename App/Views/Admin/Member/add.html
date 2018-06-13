@@ -1,4 +1,4 @@
-{extend name="base:base" /}
+{extend name="Admin/base:base" /}
 
 {block name="body"}
 <fieldset class="layui-elem-field layui-field-title">
@@ -6,7 +6,7 @@
 </fieldset>
 <div class="layui-row">
     <div class="layui-col-xs12 layui-col-md5">
-        <form class="layui-form" method="post" action="{:Url::build('renew')}">
+        <form class="layui-form" method="post" action="/admin/member/renew">
             <div class="layui-form-item">
                 <label class="layui-form-label">用户名</label>
                 <div class="layui-input-block">
@@ -53,7 +53,7 @@
 {/block}
 {block name="script"}
 <script type="text/javascript">
-    UrlHighlight("{:Url::build('User/index')}");
+    UrlHighlight("/admin/member/index");
     layui.use(['jquery', 'form', 'layer'], function () {
         layui.form.verify({
             username: function (value) {

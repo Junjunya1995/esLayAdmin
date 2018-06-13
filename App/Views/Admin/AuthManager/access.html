@@ -1,14 +1,14 @@
-{extend name="base:base" /}
+{extend name="Admin/base:base" /}
 {block name="body"}
 <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
     <ul class="layui-tab-title">
-        <li class="layui-this"><a href="{:Url::build('AuthManager/access',['group_id'=>$group_id])}">访问授权</a></li>
+        <li class="layui-this"><a href="/admin/authManager/access?group_id={$group_id}">访问授权</a></li>
         </li>
-        <li class=""><a href="{:Url::build('AuthManager/user',['group_id'=>$group_id])}">用户授权</a></li>
+        <li class=""><a href="/admin/authManager/user?group_id={$group_id}">用户授权</a></li>
     </ul>
     <div class="layui-tab-content">
         <div class="layui-tab-item layui-show">
-            <form action="{:Url::build('AuthManager/rulesArrayUpdate')}" method="post" class="">
+            <form action="/admin/AuthManager/rulesArrayUpdate" method="post" class="">
                 {volist name="node_list" id="node" }
                     <fieldset class="layui-elem-field all">
                         <legend><label><input type="checkbox" class="auth_rules rules_all" name="rules[]" value="<?php echo $main_rules[$node['url']] ?>">{$node.title}</label></legend>
@@ -46,7 +46,7 @@
 {/block}
 {block name="script"}
 <script type="text/javascript">
-    UrlHighlight("{:Url::build('AuthManager/index')}");
+    UrlHighlight("/admin/authManager/index");
     //监听提交
     layui.use(['jquery', 'form', 'layer'], function () {
         var rules = [{$this_group.rules}];
