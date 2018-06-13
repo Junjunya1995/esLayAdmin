@@ -28,7 +28,7 @@
                 <label class="layui-form-label">链接</label>
                 <div class="layui-input-block">
                     <input type="text" name="url" lay-verify="required"
-                           placeholder="函数解析的URL或者外链，支持带http://的URL或U函数参数格式"
+                           placeholder="请填写域名后面的url"
                            autocomplete="off" value="{$info.url|default=''}"
                            class="layui-input ">
                 </div>
@@ -95,7 +95,7 @@
 {/block}
 {block name="script"}
 <script type="text/javascript">
-    UrlHighlight('admin/menu/index');
+    UrlHighlight('/admin/menu/index');
     setChoose("pid", "{$info.pid ?? 0}");
     setChoose("hide", "{$info.hide ?? 0}");
     setChoose("is_dev", "{$info.is_dev ?? 0}");

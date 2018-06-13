@@ -57,11 +57,12 @@ class ControllerEX extends Controller
      */
     public function fetch($template = '', $vars = [], $config = [])
     {
+        empty($vars) || $this->assign($vars);
         if (empty($template)) { //未指定文件路径时
             $template = $this->getControllerName() . '/' .$this->getActionName();
         }
         ob_start();
-        $this->view->fetch($template, $vars, $config);
+        $this->view->fetch($template, [], $config);
         $content = ob_get_clean();
         $this->response()->write($content);
     }
@@ -71,7 +72,7 @@ class ControllerEX extends Controller
      * @param $name
      * @param $val
      */
-    protected function assign ($name, $val) {
+    protected function assign ($name, $val = '') {
         $this->view->assign($name, $val);
     }
 

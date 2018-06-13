@@ -9,6 +9,7 @@ namespace App\Models;
 
 
 use App\Traits\ModelTrait;
+use EasySwoole\Config;
 use think\Model;
 
 class DeployModel extends Model
@@ -48,8 +49,8 @@ class DeployModel extends Model
      */
     function getGroupAttr($value)
     {
-        $list = Config::get('admin_config.config_group_list');
-        return (int)$value ? $list[ $value ] : '不予显示';
+       // $list = Config::get('admin_config.config_group_list');
+        //return (int)$value ? $list[ $value ] : '不予显示';
     }
 
     /**
@@ -71,7 +72,7 @@ class DeployModel extends Model
      */
     public function getTypeAttr($value)
     {
-        $list = Config::get('admin_config.config_type_list');
+        $list = [];
         return (int)$value ? $list[ $value ] : '';
     }
 

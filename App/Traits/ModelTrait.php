@@ -25,13 +25,13 @@ trait ModelTrait
      */
     public function lists(array $map = [],  $field = '*', string $order = '', int $limit = 0)
     {
-        $object = $this::all(function ($query) use ($map, $field, $order, $limit) {
+        return $object = $this::all(function ($query) use ($map, $field, $order, $limit) {
             $query->where($map ?: null)
                 ->field($field ?: '*')
                 ->order($order ?: $this->pk.' ASC')
                 ->limit($limit ?: 10);
         });
-        return $object ? $object->toArray() : false;
+        //return $object ? $object->toArray() : false;
     }
 
     /**
@@ -167,16 +167,7 @@ trait ModelTrait
             return false;
         }
         $object=$this::where($map)->update($data);
-        if ($object){
-            //执行行为
-            Hook::listen('user_behavior', [
-                'action' => 'current_renew',
-                'model' => __CLASS__,
-                'record_id' => 0,
-                'user_id'=>UserInfo::userId(),
-                'type'=>1
-            ]);
-        }
+
         return $object;
     }
 

@@ -23,7 +23,7 @@
         {notempty name="systemMenus.main"}
         <ul class="layui-nav layui-layout-left">
             {volist name='systemMenus.main' id='vo'}
-                <li class="layui-nav-item {$vo.class ?? ''}"><a href="/{$vo.url}">{$vo.title ?? ''}</a></li>
+                <li class="layui-nav-item {$vo.class ?? ''}"><a href="{$vo.url}">{$vo.title ?? ''}</a></li>
             {/volist}
         </ul>
         {/notempty}
@@ -53,7 +53,7 @@
                             <a class="" href="javascript:;">{$key}</a>
                             <dl class="layui-nav-child">
                                 {volist name='child' id='v'}
-                                <dd><a href="javascript:void(0);" class="" data-url="/{$v['url']?? '#'}">{$v.title ?? ''}</a></dd>
+                                <dd><a href="javascript:void(0);" class="" data-url="{$v['url']?? '#'}">{$v.title ?? ''}</a></dd>
                                 {/volist}
                             </dl>
                         </li>

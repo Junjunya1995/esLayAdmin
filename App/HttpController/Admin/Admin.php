@@ -76,7 +76,7 @@ class Admin extends ControllerEX
         }
         $controller = strtolower($this->getControllerName());//当前的控制器名
         $action = strtolower($this->getActionName());//当前的操作名
-        $url = "{$controller}/{$action}";
+        $url = "/{$controller}/{$action}";
         $where = [
             ['pid', '=', 0],
             ['hide', '=', 0],
@@ -214,5 +214,61 @@ class Admin extends ControllerEX
         }
         $this->response()->write(json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
         $this->response()->withHeader('Content-type','application/json;charset=utf-8');
+    }
+
+
+    /**
+     * 通用排序更新
+     * @param int $id 菜单ID
+     * @param int $sort 排序
+     * @author staitc7 <static7@qq.com>
+     */
+    public function currentSort($id = 0, $sort = null) {
+        (int) $id || $this->error('参数错误');
+        is_numeric((int) $sort) || $this->error('排序非数字');
+        $info =$this->app->model($this->app->request->controller())->setStatus([['id', '=', $id]], ['sort' => (int) $sort]);
+        return $info !== false ?
+            $this->success('排序更新成功') :
+            $this->error('排序更新失败');
+    }
+
+
+    /**
+     * 通用单条数据状态修改
+     * @return bool|void
+     * @throws ModelNotFoundException
+     * @internal param ids $int 数据条件
+     */
+    public function setStatus() {
+        $data = $this->request()->getParsedBody();
+
+        $value = $data['value'];
+        $ids = $data['ids'];
+        empty($ids) && $this->error('请选择要操作的数据');
+        is_numeric((int) $value) || $this->error('参数错误');
+        $controller  = $this->getControllerName();
+        $model = explode('Admin/', $controller)[1];
+
+        $info = $this->model($model.'Model')
+            ->setStatus([['id','in', $ids]], ['status' => $value]);
+        $info !== false ?
+            $this->success($value == -1 ? '删除成功' : '更新成功') :
+            $this->error($value == -1 ? '删除失败' : '更新失败');
+    }
+
+    /**
+     * 通用批量数据更新
+     * @param int $value 状态
+     * @author staitc7 <static7@qq.com>
+     */
+    public function batchUpdate($value = null) {
+        $ids = $this->app->request->post();
+        empty($ids['ids']) && $this->error('请选择要操作的数据');
+        is_numeric((int) $value) || $this->error('参数错误');
+        $info = $this->app->model($this->app->request->controller())
+            ->setStatus([['id','in', $ids['ids']]], ['status' => $value]);
+        return $info !== false ?
+            $this->success($value == -1 ? '删除成功' : '更新成功') :
+            $this->error($value == -1 ? '删除失败' : '更新失败');
     }
 }

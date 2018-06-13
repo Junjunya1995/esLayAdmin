@@ -1,9 +1,9 @@
 {extend name="Admin/base:base" /}
 {block name="body"}
 <div class="layui-btn-group">
-    <a class="layui-btn layui-btn-sm layui-btn-normal" href="">增加</a>
+    <a class="layui-btn layui-btn-sm layui-btn-normal" href="/admin/menu/add">增加</a>
     <button class="layui-btn layui-btn-sm layui-btn-danger ajax-post confirm"
-            url="" target-form="ids">删除
+            url="/admin/menu/batchUpdate?value=-1" target-form="ids">删除
     </button>
     {present name='father'}
     <a class="layui-btn layui-btn-sm layui-btn-normal"
@@ -56,15 +56,15 @@
             loading: false,
             cols: [[ //table column
                 {checkbox: true},
-                {field: 'id', title: 'ID', width: 100},
-                {field: 'title', title: '名称', width: 280, templet: '#title'},
-                {field: 'father', title: '上级菜单', width: 150, templet: '#father'},
-                {field: 'group', title: '分组', width: 150},
-                {field: 'url', title: 'URL', width: 300},
-                {field: 'sort', title: '排序', width: 80, edit: 'text'},
-                {field: 'is_dev', title: '仅开发者模式显示', width: 150, templet: '#isDev'},
-                {field: 'hide', title: '隐藏', width: 80,templet: '#hide'},
-                {field: 'status', title: '状态', width: 100, templet: '#statusTpl'},
+                {field: 'id', title: 'ID'},
+                {field: 'title', title: '名称', templet: '#title'},
+                {field: 'father', title: '上级菜单', templet: '#father'},
+                {field: 'group', title: '分组'},
+                {field: 'url', title: 'URL'},
+                {field: 'sort', title: '排序', edit: 'text'},
+                {field: 'is_dev', title: '仅开发者模式显示', templet: '#isDev'},
+                {field: 'hide', title: '隐藏',templet: '#hide'},
+                {field: 'status', title: '状态', templet: '#statusTpl'},
                 {fixed: 'right', title: '操作', align: 'center', width: 200, toolbar: '#operating'},
             ]]
         });
@@ -74,7 +74,7 @@
                 case "status":
                     layui.layer.confirm('确定执行该操作吗?', function (index) {
                         layui.layer.close(index);
-                        layui.$.post("", {
+                        layui.$.post("/admin/menu/setStatus", {
                             value: Math.abs(obj.data.status - 1),
                             ids: obj.data.id
                         }, function (data) {
@@ -93,7 +93,7 @@
                     layui.layer.confirm('确定执行该操作吗?', function (index) {
                         obj.del();
                         layui.layer.close(index);
-                        layui.$.post("", {
+                        layui.$.post("/admin/menu/setStatus", {
                             value: -1,
                             ids: obj.data.id
                         }, function (data) {
@@ -111,7 +111,7 @@
                     window.location.href = createURL("/admin/menu/edit", {id: obj.data.id});
                     break;
                 case 'isDev':
-                        layui.$.post("", {
+                        layui.$.post("/admin/menu/toogle", {
                             ids: obj.data.id,
                             value: Math.abs(obj.data.is_dev - 1),
                             field:'is_dev'
@@ -127,7 +127,7 @@
                         });
                     break;
                 case 'hide':
-                    layui.$.post("", {
+                    layui.$.post("/admin/menu/toogle", {
                         ids: obj.data.id,
                         value: Math.abs(obj.data.hide - 1),
                         field:'hide'
@@ -154,7 +154,7 @@
                 alert_msg('排序必须为一个数字', 0);
                 return false;
             }
-            layui.$.get("", {id: obj.data.id, sort: sort}, function (data) {
+            layui.$.get("/admin/menu/currentSort", {id: obj.data.id, sort: sort}, function (data) {
                 if (data.code !== 1) {
                     return alert_msg(data.msg, 0)
                 }
