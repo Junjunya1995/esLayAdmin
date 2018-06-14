@@ -9,8 +9,8 @@
 namespace App\HttpController\Admin;
 
 
-use App\Models\MemberModel;
-use App\Models\UcenterMemberModel;
+use App\Model\MemberModel;
+use App\Model\UcenterMemberModel;
 use EasySwoole\Config;
 use Lib\HttpController;
 use think\Template;

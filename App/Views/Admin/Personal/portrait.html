@@ -1,0 +1,62 @@
+<div class="layui-col-xs6 layui-col-md11 m15">
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">修改头像</label>
+            <div class="layui-input-block">
+                <button type="button" class="layui-btn" id="user_portrait">
+                    <i class="layui-icon">&#xe67c;</i>上传图片
+                </button>
+            </div>
+            <div class="layui-input-block picture" style="padding-top: 3px;">
+                <img src="" alt="" height=256 width=256 id="user_pic" class="layui-upload-img">
+                <div style="padding-top: 5px;" id="user_portrait_before"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['jquery', 'form', 'layer', 'upload'], function () {
+        //监听提交
+        layui.form.on('submit(portrait)', function (form) {
+            layui.$.post(form.form.action, form.field, function (data) {
+                status_load(data, form.elem);
+            });
+            return false;
+        });
+        var before;
+        var upload_pic = layui.upload.render({
+            elem: '#user_portrait',
+            url: "/admin/personal/submitPortrait",
+            auto: false,
+            bindAction: "#portrait_pic",
+            field: "UserPicture",
+            size: 2048,
+            before: function (obj) {
+                loading = layui.layer.load(2); //上传loading
+            },
+            choose: function (obj) {
+                obj.preview(function (index, file, result) {
+                    layui.$('#user_pic').attr('src', result).removeClass('layui-hide');
+                    before = layui.$('#user_portrait_before');
+                    before.html('<a class="layui-btn portrait_pic">上传</a>');
+                    before.find('.portrait_pic').on('click', function () {
+                        upload_pic.upload();
+                    });
+                });
+            },
+            done: function (res, index, upload) {
+                layui.layer.close(loading); //关闭loading
+                if (res.code == 1) {
+                    layui.$('#user_pic').attr('src', res.data.path);
+                    layui.layer.msg(res.msg);
+                    setTimeout(function () {
+                        location.replace(location);
+                    }, 1500);
+                } else {
+                    layui.layer.msg(res.msg);
+                    console.log(res);
+                }
+            }
+        });
+    });
+</script>

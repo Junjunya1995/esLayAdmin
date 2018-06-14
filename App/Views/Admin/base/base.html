@@ -33,10 +33,13 @@
             <!--<li class="layui-nav-item"><a href="">通知(<strong style="color: red;">12</strong>)</a></li>-->
             <li class="layui-nav-item">
                 <a href="javascript:;">
-
+                    <img src="" class="layui-nav-img">
+                    {$userinfo.nickname}
                 </a>
                 <dl class="layui-nav-child">
-
+                    <dd><a class="personal" href="/admin/Personal/portrait">修改头像</a></dd>
+                    <dd><a class="personal" href="/admin/Personal/updatePassword">修改密码</a></dd>
+                    <dd><a class="personal" href="/admin/Personal/updateNickname">修改昵称</a></dd>
                 </dl>
             </li>
         </ul>

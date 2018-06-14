@@ -7,7 +7,7 @@
 namespace App\HttpController\Admin;
 
 
-use App\Models\DeployModel;
+use App\Model\DeployModel;
 
 class Deploy extends Admin {
 

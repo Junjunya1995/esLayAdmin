@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: LWD
+ * User: wzj
  * Date: 2018/6/4
  * Time: 23:43
  */
@@ -39,6 +39,7 @@ class Admin extends HttpController
         }
 
         if ($this->requestex()->isGet()) {
+            $this->assign('userinfo', $this->getUser());
             $this->assign('systemMenus', $this->getMenus());
         }
 
@@ -53,6 +54,13 @@ class Admin extends HttpController
         }
         if (isset($user['hotelid'])) { return  $user['hotelid'];}
         return $this->session()->get('user_auth_sign') == data_auth_sign((array)$user) ? (int) $user['uid'] : 0;
+    }
+
+    protected function getUser() {
+        if (0 === $this->isLogin()) {
+            return false;
+        }
+        return $this->session()->get('user_info');
     }
 
     /**
@@ -111,7 +119,7 @@ class Admin extends HttpController
                     $second_urls = Db::name("menu")->where('pid',$item['id'])->field('id,url')->select() ?: []; //获取二级分类的合法url
                     $to_check_urls = $this->toCheckUrl($second_urls); // 检测菜单权限
                     foreach ($groups as $g) {// 按照分组生成子菜单树
-                        $where=[['pid','=',$item['id']],['group','=',$g]];
+                        $where=[['pid','=',$item['id']], ['group','=',$g], ['status', '<>', -1]];
                         //if (isset($to_check_urls) && !empty($to_check_urls)) {
                             $where[] = ['url','in', $to_check_urls];
                         //}
