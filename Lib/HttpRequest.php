@@ -11,7 +11,7 @@ namespace Lib;
 
 use EasySwoole\Core\Http\Request;
 
-class RequestEX
+class HttpRequest
 {
     private  $request = null;
     public function __construct(Request $request)

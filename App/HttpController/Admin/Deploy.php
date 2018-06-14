@@ -1,7 +1,6 @@
 <?php
 /**
  * Description of Deploy.php.
- * User: static7 <static7@qq.com>
  * Date: 2017-08-03 14:31
  */
 
@@ -30,20 +29,23 @@ class Deploy extends Admin {
      * @param int $limit 每页条数
      * @return mixed
      */
-    public function deployJson($page = 1,$limit=10,$group = 0)
+    public function deployJson()
     {
+        $data = $this->request()->getParsedBody();
+        $page  = (int)$data['page']  ?? 1;
+        $limit = (int)$data['limit'] ?? 10;
+        $group = $data['group'] ?? 0;
         $map=[
             ['status','=',1],
             ['group',(int)$group ? '=':'>=', (int)$group?:0]
         ];
         $field = 'id,name,group,type,sort,area,title';
-        $data  = $this->app->model('Deploy')->listsJson($map, $field, 'sort asc', (int)$page ?: 1,(int)$limit);
+        $data  = $this->model('DeployModel')->listsJson($map, $field, 'sort asc', $page, $limit);
         return $this->layuiJson($data);
     }
 
     /**
      * 用户更新或者添加菜单
-     * @author staitc7 <static7@qq.com>
      */
     public function renew() {
         $Deploy = $this->app->model('Deploy');
@@ -67,21 +69,20 @@ class Deploy extends Admin {
      * @param int $id 分组
      * @return mixed
      */
-    public function group($id = 1)
+    public function group()
     {
+        $id = $this->request()->getQueryParam('id') ?? 1;
         (int)$id || $this->error('参数错误');
         $field = 'id,name,title,extra,value,remark,type';
-        $Model = new DeployModel();
+        $Model = $this->model('DeployModel');
         $data  = $Model->lists([['group','=',(int)$id],['status','=', 1]], $field, 'sort desc');
-//        $type  = $this->app->config->get('admin_config.config_group_list') ?? null;
-//        return $this->setView([
-//            'list' => $data,
-//            'group_id' => $id,
-//            'type' => $type,
-//            'metaTitle' => "{$type[$id]}设置"
-//        ]);
-        $this->assign('list', $data);
-        $this->fetch();
+        $type  = [1=>'基本', 2=>'内容', 3=>'用户', 4=>'系统'];
+        $this->fetch('' ,[
+            'list' => $data,
+            'group_id' => $id,
+            'type' => $type,
+            'metaTitle' => "{$type[$id]}设置"
+        ]);
     }
 
     /**

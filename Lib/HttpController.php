@@ -17,7 +17,7 @@ use EasySwoole\Core\Http\Session\Session;
 use think\Db;
 use think\Template;
 
-class ControllerEX extends Controller
+class HttpController extends Controller
 {
 
     protected  $view;
@@ -140,11 +140,11 @@ class ControllerEX extends Controller
 
     /**
      * 扩展了 原本的request对象的方法
-     * @return RequestEX
+     * @return HttpRequest
      */
-    protected  function  requestex(): RequestEX
+    protected  function  requestex(): HttpRequest
     {
-        return new RequestEX(parent::request());
+        return new HttpRequest(parent::request());
     }
 
     protected function getControllerName(): string

@@ -6,7 +6,7 @@
     <ul class="layui-tab-title">
         {volist name='type' id='group'}
         <li class="{eq name='group_id' value='$key'}layui-this{/eq}">
-            <a href="">{$group}配置</a>
+            <a href="?id={$key}">{$group}配置</a>
         </li>
         {/volist}
     </ul>
@@ -63,7 +63,7 @@
 {/block}
 {block name="script"}
 <script type="text/javascript">
-    UrlHighlight("");
+    UrlHighlight("/admin/deploy/group");
     layui.use(['jquery','element','form'], function () {
         layui.form.render('select');
         //监听提交

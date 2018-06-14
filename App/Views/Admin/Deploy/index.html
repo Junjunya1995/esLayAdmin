@@ -1,9 +1,9 @@
-{extend name="base:base" /}
+{extend name="Admin/base:base" /}
 {block name="body"}
 <div class="layui-btn-group">
-    <a class="layui-btn layui-btn-sm layui-btn-normal" href="{:Url::build('edit')}">增加</a>
+    <a class="layui-btn layui-btn-sm layui-btn-normal" href="/admin/deploy/edit">增加</a>
     <button class="layui-btn layui-btn-sm layui-btn-danger ajax-post confirm"
-            url="{:Url::build('batchUpdate',['value'=>-1])}" target-form="ids">删除
+            url="/admin/deploy/batchUpdate?value=-1" target-form="ids">删除
     </button>
 </div>
 
@@ -12,14 +12,14 @@
 {block name="script"}
 <script type="text/html" id="operating">
     <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">详细</a>
-    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">删除</a>
+    <a class="layui-btn layui-btn-danger  layui-btn-xs" lay-event="delete">删除</a>
 </script>
 <script type="text/javascript">
-    UrlHighlight("{:Url::build('Deploy/index')}");
+    UrlHighlight("/admin/deploy/index");
     layui.use(['jquery', 'form', 'table', 'layer'], function () {
         var table_reload = layui.table.render({
             elem: '#deploy',
-            url: "{:Url::build('Deploy/deployJson')}",
+            url: "/admin/deploy/deployJson",
             page: true,
             method: 'post',
             limit: 10,
@@ -27,13 +27,13 @@
             loading: false,
             cols: [[ //标题栏
                 {checkbox: true},
-                {field: 'id', title: 'ID', width: 80},
-                {field: 'name', title: '名称', width: 250},
-                {field: 'title', title: '标题', width: 250},
-                {field: 'group', title: '分组', width: 100},
-                {field: 'area', title: '区域', width: 100},
-                {field: 'sort', title: '排序(点击可编辑)', width: 200, edit: 'text'},
-                {field: 'type', title: '类型', width: 200},
+                {field: 'id', title: 'ID', width: 50},
+                {field: 'name', title: '名称'},
+                {field: 'title', title: '标题'},
+                {field: 'group', title: '分组'},
+                {field: 'area', title: '区域'},
+                {field: 'sort', title: '排序(点击可编辑)', edit: 'text'},
+                {field: 'type', title: '类型'},
                 {fixed: 'right', title: '操作', align: 'center', width: 200, toolbar: '#operating'},
             ]],
         });
@@ -44,7 +44,7 @@
                     layui.layer.confirm('真的删除行么', function (index) {
                         obj.del(); //删除对应行（tr）的DOM结构
                         layui.layer.close(index);
-                        layui.$.post("{:Url::build('setStatus')}", {ids: obj.data.id, value: -1}, function (data) {
+                        layui.$.post("/admin/deploy/setStatus", {ids: obj.data.id, value: -1}, function (data) {
                             if (data.code !== 1) {
                                 return alert_msg(data.msg, 0)
                             }
@@ -56,7 +56,7 @@
                     });
                     break;
                 case 'detail':
-                    window.location.href = createURL("{:Url::build('edit')}", {id: obj.data.id});
+                    window.location.href = createURL("/admin/deploy/edit", {id: obj.data.id});
                     break;
                 default:
                     layui.layer.msg('噢，天啊！你点了什么？');
@@ -69,7 +69,7 @@
                 alert_msg('排序必须为一个数字', 0);
                 return false;
             }
-            layui.$.get("{:Url::build('currentSort')}", {id: obj.data.id, sort: sort}, function (data) {
+            layui.$.get("/admin/deploy/currentSort", {id: obj.data.id, sort: sort}, function (data) {
                 if (data.code !== 1) {
                     return alert_msg(data.msg, 0)
                 }

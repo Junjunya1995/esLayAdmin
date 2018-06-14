@@ -5,7 +5,7 @@
  * Date: 2017-08-03 14:31
  */
 
-namespace App\Models;
+namespace App\Models\Admin;
 
 
 use App\Traits\ModelTrait;
@@ -72,7 +72,14 @@ class DeployModel extends Model
      */
     public function getTypeAttr($value)
     {
-        $list = [];
+        $list = [
+            1 => '字符',
+            2 => '文本',
+            3 => '数组',
+            4 => '枚举',
+            5 => '多维枚举',
+            6 => '数字',
+        ];
         return (int)$value ? $list[ $value ] : '';
     }
 

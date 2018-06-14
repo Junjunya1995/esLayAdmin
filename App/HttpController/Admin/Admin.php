@@ -9,14 +9,12 @@
 namespace App\HttpController\Admin;
 
 
-use EasySwoole\Config;
-use Lib\ControllerEX;
+use Lib\HttpController;
 use think\Db;
 use think\db\exception\ModelNotFoundException;
 use think\Model;
-use think\Template;
 
-class Admin extends ControllerEX
+class Admin extends HttpController
 {
 
     private $models = [];
@@ -188,17 +186,17 @@ class Admin extends ControllerEX
      */
     protected function model($model, $namespace = 'App\Models\Admin'):Model {
         $namespaceInt = 'App\Models';
+
+        if (class_exists($namespace . '\\' . $model)) {
+            $model = $namespace.'\\'.$model;
+        } else  if (class_exists($namespaceInt.'\\'.$model)){
+            $model = $namespaceInt.'\\'.$model;
+        } else {
+            throw new ModelNotFoundException("类没有找到");
+        }
         if (empty($this->models[$model])) {
-            if (class_exists($namespace . '\\' . $model)) {
-                $model = $namespace.'\\'.$model;
-            } else  if (class_exists($namespaceInt.'\\'.$model)){
-                $model = $namespaceInt.'\\'.$model;
-            } else {
-                throw new ModelNotFoundException("类没有找到");
-            }
             $this->models[$model] = new $model();
         }
-
         return $this->models[$model];
     }
 

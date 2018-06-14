@@ -12,10 +12,10 @@ namespace App\HttpController\Admin;
 use App\Models\MemberModel;
 use App\Models\UcenterMemberModel;
 use EasySwoole\Config;
-use Lib\ControllerEX;
+use Lib\HttpController;
 use think\Template;
 
-class Login extends ControllerEX
+class Login extends HttpController
 {
 
     /**
