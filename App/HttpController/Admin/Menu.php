@@ -48,14 +48,12 @@ class Menu extends  Admin {
             ['status', '<>', -1],
             ['pid', '=', (int)$data['pid'] ?: 0]
         ];
-        $data = [];
         try {
             $data = $this->model('MenuModel')
-                ->listsJson($map, null, 'sort asc,id asc', (int)$data['page'] ?: 1, $data['limit'] ?? 10);
+                ->listsJson($map, null, 'sort asc,id asc', (int)$data['page'] ?? 1, $data['limit'] ?? 10);
         } catch (ModelNotFoundException $e) {
 
         }
-
         return $this->layuiJson($data);
     }
 

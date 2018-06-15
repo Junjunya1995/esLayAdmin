@@ -97,4 +97,9 @@ class Login extends HttpController
 //        ];
         return true;
     }
+
+    public function logout() {
+        $this->session()->destroy();
+        $this->response()->redirect('/admin');
+    }
 }

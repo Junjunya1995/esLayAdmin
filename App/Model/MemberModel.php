@@ -10,7 +10,6 @@ namespace App\Model;
 
 
 use App\Traits\ModelTrait;
-use EasySwoole\Core\Http\Request;
 use think\Model;
 
 class MemberModel extends Model

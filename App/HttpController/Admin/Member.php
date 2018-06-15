@@ -31,7 +31,7 @@ class Member extends Admin
         $page = $data['page'] ?? 1;
         $limit = $data['limit'] ?? 10;
         if (!$this->requestex()->isAjax()) {
-            return $this->json('系统错误!,请重新刷新页面');
+            return $this->error('系统错误!,请重新刷新页面');
         }
         $data = $this->model('MemberModel')->listsJson([['status','<>',-1]], '', '', (int)$page ?: 1,$limit);
         $this->layuiJson($data);

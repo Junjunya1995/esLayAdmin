@@ -192,8 +192,8 @@ class Admin extends HttpController
      * @return Model
      * @throws ModelNotFoundException
      */
-    protected function model($model, $namespace = 'App\Models\Admin'):Model {
-        $namespaceInt = 'App\Models';
+    protected function model($model, $namespace = 'App\Model\Admin'):Model {
+        $namespaceInt = 'App\Model';
 
         if (class_exists($namespace . '\\' . $model)) {
             $model = $namespace.'\\'.$model;
