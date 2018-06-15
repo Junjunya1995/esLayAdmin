@@ -24,6 +24,7 @@ class MemberModel extends Model
     /**
      * 登录指定用户
      * @param  integer $user_id 用户ID
+     * @param          $ip
      * @return boolean      ture-登录成功，false-登录失败
      */
     public function login($user_id = 0, $ip) {
@@ -121,4 +122,8 @@ class MemberModel extends Model
         return $value ? long2ip($value) : null;
     }
 
+//    public function getPortraitAttr($value) {
+//
+//        return $value;
+//    }
 }

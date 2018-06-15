@@ -96,11 +96,11 @@ class HttpController extends Controller
             $this->response()->write(json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
             $this->response()->withHeader('Content-type','application/json;charset=utf-8');
             $this->response()->withStatus(200);
-            return true;
+
         }else{
             trigger_error("response has end");
-            return false;
         }
+        $this->response()->end();
     }
 
     //用来返回成功信息（json）
@@ -114,10 +114,9 @@ class HttpController extends Controller
             $this->response()->write(json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
             $this->response()->withHeader('Content-type','application/json;charset=utf-8');
             $this->response()->withStatus(200);
-            return true;
+            $this->response()->end();
         }else{
             trigger_error("response has end");
-            return false;
         }
     }
 

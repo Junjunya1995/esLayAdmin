@@ -77,7 +77,7 @@ function portrait($user_id = null) {
  * @author huajie <banhuajie@163.com>
  */
 function get_cover($cover_id = 0, $fields = '') {
-    $default_path=Request::rootUrl().'/'.Request::module().'/imgs/null.gif';
+    $default_path=  '/static/common/imgs/noimg.png';
     if ((int)$cover_id <1 ){//返回默认图片
         return $default_path;
     }
@@ -87,7 +87,7 @@ function get_cover($cover_id = 0, $fields = '') {
     if (empty($info)){
         return $default_path;
     }else{
-        return $fields ? $info[$fields] : $info['url'] ?: Request::rootUrl().$info['path'];
+        return $fields ? $info[$fields] : $info['url'] ?: $info['path'];
     }
 }
 

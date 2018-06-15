@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
-    <link rel="stylesheet" href="__STATIC__/common/css/layui.css">
+    <link rel="stylesheet" href="__STATIC__/common/layui/css/layui.css">
     <link rel="stylesheet" href="__ADMIN__/css/main.css" media="all">
     {block name="css"}{/block}
 </head>
@@ -33,7 +33,7 @@
             <!--<li class="layui-nav-item"><a href="">通知(<strong style="color: red;">12</strong>)</a></li>-->
             <li class="layui-nav-item">
                 <a href="javascript:;">
-                    <img src="" class="layui-nav-img">
+                    <img src="{:get_cover($userinfo['portrait'])}" class="layui-nav-img">
                     {$userinfo.nickname}
                 </a>
                 <dl class="layui-nav-child">
@@ -81,8 +81,8 @@
     {/block}
 </div>
 {block name="hide"}{/block}
-<script type="text/javascript" src="__STATIC__/common/layui.js" charset="utf-8"></script>
-<script type="text/javascript" src="__STATIC__/common/common/common.js" charset="utf-8"></script>
+<script type="text/javascript" src="__STATIC__/common/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="__STATIC__/common/js/common.js" charset="utf-8"></script>
 <script type="text/javascript">
     layui.use(['element', 'jquery'], function () {
         layui.element.on('nav(left_url)', function (elem) {
