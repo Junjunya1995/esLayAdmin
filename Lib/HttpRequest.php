@@ -26,15 +26,6 @@ class HttpRequest
     }
 
     /**
-     * 获取请求方式 GET POST
-     * @author wzj
-     * @return mixed
-     */
-    public function getMethod() {
-        return $this->request->getServerParams()['request_method'];
-    }
-
-    /**
      * 判断是否是POST 请求
      * @return bool
      */
@@ -72,11 +63,21 @@ class HttpRequest
         return  count($ip)  ? $ip[0] : '0.0.0.0';
     }
 
+    public function get($name = '') {
+        return  $name == true ?  $this->request->getQueryParam($name) ?? null :
+            $this->request->getQueryParams();
+    }
+
+    public function post($name = '') {
+        return  $name == true ?  $this->request->getParsedBody()[$name] ?? null :
+            $this->request->getParsedBody();
+    }
+
     /**
      * 获取当前请求的参数
-     * @param string $name
-     * @param null   $default
-     * @param string $filter
+     * @param string $name    参数名
+     * @param null   $default 默认值
+     * @param string $filter  预处理函数
      * @author wzj
      * @return array|null
      */

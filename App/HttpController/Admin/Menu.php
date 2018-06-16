@@ -8,7 +8,7 @@
 namespace  App\HttpController\Admin;
 
 
-use Lib\Tree;
+use App\Facade\Tree;
 use think\db\exception\ModelNotFoundException;
 
 class Menu extends  Admin {

@@ -2,6 +2,7 @@
 
 namespace App\HttpController\Admin;
 
+use App\Facade\Tree;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 use EasySwoole\VerifyCode\VerifyCode;
@@ -18,7 +19,6 @@ class Index extends Admin
 
     public function index()
     {
-
         return $this->fetch();
     }
 

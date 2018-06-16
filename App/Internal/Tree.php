@@ -2,26 +2,15 @@
 /**
  * Created by PhpStorm.
  * User: wzj
- * Date: 2018/6/12
- * Time: 23:12
+ * Date: 2018/6/16
+ * Time: 10:19
  */
 
-namespace Lib;
+namespace App\Internal;
 
 
-/**
- * Description of Tree
- * 生成多层树状下拉选框的工具模型
- */
-class Tree {
-    private static $instance  ;
-    public static function __callStatic($method,$args){
-        if (self::$instance  === null) {
-            self::$instance  = new self();
-        }
-        return call_user_func_array([self::$instance, $method], $args);;
-    }
-
+class Tree
+{
     /**
      * 把返回的数据集转换成Tree
      * @access public
@@ -72,7 +61,7 @@ class Tree {
      */
     private $formatTree; //用于树型数组完成递归格式的全局变量
 
-    private function _toFormatTree($list, $level = 0, $title = 'title') {
+    public function _toFormatTree($list, $level = 0, $title = 'title') {
         foreach ($list as $key => $val) {
             $tmp_str = str_repeat("&nbsp;&nbsp;", $level * 2);
             $tmp_str .= "&nbsp;";
@@ -92,11 +81,10 @@ class Tree {
         return;
     }
 
-    private function toFormatTree($list, $title = 'title', $pk = 'id', $pid = 'pid', $root = 0) {
+    public function toFormatTree($list, $title = 'title', $pk = 'id', $pid = 'pid', $root = 0) {
         $list = list_to_tree($list, $pk, $pid, '_child', $root);
         $this->formatTree = [];
         $this->_toFormatTree($list, 0, $title);
         return $this->formatTree;
     }
-
 }
