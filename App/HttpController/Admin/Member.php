@@ -19,13 +19,10 @@ class Member extends Admin
 
     /**
      * 用户
-     * @author staitc7 <static7@qq.com>
-     * @param int $page  当前页
-     * @param int $limit 每页条数
      * @return mixed
      * @throws \think\db\exception\ModelNotFoundException
      */
-    public function userJson($page = 1,$limit=10)
+    public function userJson()
     {
         $data = $this->request()->getParsedBody();
         $page = $data['page'] ?? 1;
@@ -46,16 +43,20 @@ class Member extends Admin
 
     /**
      * 添加用户
-     * @author staitc7 <static7@qq.com>
      * @return mixed
+     * @throws \think\db\exception\ModelNotFoundException
      */
     public function renew()
     {
-        $Member =$this->app->model('Member');
-        $info=$Member->userAdd();
+        $Member =$this->model('MemberModel');
+        $data = $this->requestex()->param();
+        $data['reg_ip'] = $this->requestex()->getIp();
+        $info=$Member->userAdd($data);
         if ($info===false) {
             return $this->error($Member->getError());
         }
+        $this->success('新增成功','/admin/member/index');
+
     }
 
 

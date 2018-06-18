@@ -9,6 +9,7 @@
 namespace App\HttpController\Admin;
 
 
+use Lib\Auth;
 use Lib\HttpController;
 use think\Db;
 use think\db\exception\ModelNotFoundException;
@@ -63,6 +64,10 @@ class Admin extends HttpController
         return $this->session()->get('user_info');
     }
 
+    protected function isAdmin () :bool {
+        return $this->getUser()['uid'] === 1;
+    }
+
     /**
      * @return bool|null
      * @throws \think\db\exception\DataNotFoundException
@@ -74,10 +79,9 @@ class Admin extends HttpController
         if ($this->requestex()->isAjax()) { //ajax 跳过
             return false;
         }
-
-
         $menus = $this->session()->get('admin_meun_list');
         if ($menus) {
+            //TODO :
             //return $menus;
         }
         $controller = strtolower($this->getControllerName());//当前的控制器名
@@ -95,10 +99,10 @@ class Admin extends HttpController
         foreach ($menus['main'] as $key => $item) {
             $item['url'] = strtolower($item['url']);
             // 判断主菜单权限
-//            if (!UserInfo::isAdmin() && !$this->checkRule("{$module}/{$item['url']}", $this->app->config->get('config.auth_rule.rule_main'), null)) {
-//                unset($menus['main'][$key]);
-//                continue; //继续循环
-//            }
+            if (!$this->isAdmin() && !$this->checkRule($url, 2, null)) {
+                unset($menus['main'][$key]);
+                continue; //继续循环
+            }
             $url  == $item['url'] ? $menus['main'][$key]['class'] = 'layui-this' : null;
         }
         $map = [
@@ -171,8 +175,8 @@ class Admin extends HttpController
     final private function checkRule($rule, $type = null, $mode = 'url') {
         static $Auth_static = null;
         $Auth = $Auth_static ?? new Auth();
-        $type = $type ? $type : $this->app->config->get('config.auth_rule.rule_url');
-        if (!$Auth->check($rule, UserInfo::userId(), $type, $mode)) {
+        $type = $type ? $type : 1;
+        if (!$Auth->check($rule, $this->isLogin(), $type, $mode)) {
             return false;
         }
         return true;

@@ -1,9 +1,9 @@
-{extend name="base:base" /}
+{extend name="Admin/base:base" /}
 {block name="body"}
 <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
     <ul class="layui-tab-title">
-        <li class=""><a href="{:Url::build('AuthManager/access',['group_id'=>$group_id])}">访问授权</a></li>
-        <li class="layui-this"><a href="{:Url::build('AuthManager/user',['group_id'=>$group_id])}">用户授权</a></li>
+        <li class=""><a href="/admin/AuthManager/access?group_id={$group_id}">访问授权</a></li>
+        <li class="layui-this"><a href="/admin/AuthManager/user?group_id={$group_id}">用户授权</a></li>
     </ul>
     <div class="layui-tab-content">
         <div class="layui-form">
@@ -12,7 +12,7 @@
             </div>
             <div class="layui-inline">
                 <select name="group_id" lay-filter="group_id">
-                    <option>请选择用户组</option>
+                    <option value="0" disabled>请选择用户组</option>
                     {notempty name="auth_group"}
                         {volist name="auth_group" id="vo"}
                             <option value="{$vo['id']}">{$vo.title}</option>
@@ -35,13 +35,13 @@
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="relieve">解除授权</a>
 </script>
 <script type="text/javascript">
-    UrlHighlight("{:Url::build('AuthManager/index')}");
+    UrlHighlight("/admin/authManager/index");
     setChoose('group_id', "{$group_id ?? ''}");
     //监听提交
     layui.use(['jquery', 'form','table', 'layer'], function () {
         table_reload = layui.table.render({
             elem: '#user',
-            url: "{:Url::build('AuthManager/userJson')}",
+            url: "/admin/AuthManager/userJson",
             where:{group_id:"{$group_id}"},
             page: true,
             method: 'post',
@@ -65,7 +65,7 @@
                 case "relieve":
                     layui.layer.confirm('确定执行该操作吗?', function (index) {
                         layui.layer.close(index);
-                        layui.$.post("{:Url::build('AuthManager/removeFromGroup')}", {
+                        layui.$.post("/admin/authManager/removeFromGroup", {
                             group_id: "{$group_id}",
                             uid: obj.data.uid
                         }, function (data) {
@@ -94,7 +94,7 @@
 
         layui.form.on('select(group_id)',function (event) {
             layui.layer.load(2);
-            location.href =createURL("{:Url::build('AuthManager/user')}",{group_id:event.value});
+            location.href =createURL("/admin/authManager/user",{group_id:event.value});
         });
 
         layui.$('.addToGroup').on('click', function () {
@@ -109,7 +109,7 @@
     })
 </script>
 <div id="addUsertpl" style="display: none;">
-    <form class="layui-form" style="margin: 15px;" action="{:Url::build('AuthManager/addToGroup')}" method="post">
+    <form class="layui-form" style="margin: 15px;" action="/admin/authManager/addToGroup" method="post">
         <div class="layui-form-item">
             <label class="layui-form-label w-0">用户UID</label>
             <div class="layui-input-inline">

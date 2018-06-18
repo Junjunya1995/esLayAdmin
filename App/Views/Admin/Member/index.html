@@ -68,7 +68,7 @@
                     layui.layer.confirm('确定执行该操作吗?', function (index) {
                         obj.del();
                         layui.layer.close(index);
-                        layui.$.post("", {
+                        layui.$.post("/admin/member/setStatus", {
                             status: -1,
                             ids: obj.data.uid
                         }, function (data) {
@@ -83,7 +83,7 @@
                     });
                     break;
                 case 'authorize':
-                    layui.$.get("", {id: obj.data.uid}, function (str) {
+                    layui.$.get("/admin/authManager/group", {id: obj.data.uid}, function (str) {
                         if (str.code === 0) {
                             return alert_msg(str.msg);
                         };
@@ -96,7 +96,7 @@
                     });
                     break;
                 case "detail" :
-                    window.location.href = createURL("", {uid: obj.data.uid});
+                    window.location.href = createURL("/admin/member/edit", {uid: obj.data.uid});
                     break;
                 default:
                     layui.layer.msg('噢，天啊！你点了什么？');

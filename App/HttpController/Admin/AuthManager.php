@@ -9,6 +9,8 @@
 namespace App\HttpController\Admin;
 
 
+use think\Db;
+
 class AuthManager extends Admin
 {
     /**
@@ -56,7 +58,7 @@ class AuthManager extends Admin
         $main_rules = $AuthRule->mapList([$map,$ruleArray], 'name,id');
         $ruleArray=['type','=', 1];
         $child_rules = $AuthRule->mapList([$map,$ruleArray], 'name,id');
-        return $this->fetch('',[
+        $this->fetch('',[
             'main_rules' => array_column($main_rules,'id','name'),
             'auth_rules' => array_column($child_rules,'id','name'),
             'node_list' => $node_list,
@@ -69,14 +71,13 @@ class AuthManager extends Admin
 
     /**
      * 用户组授权用户
-     * @author static7
-     * @param int $group_id
      * @return mixed
      */
-    public function user($group_id = 0) {
+    public function user() {
+        $group_id = $this->requestex()->get('group_id');
         (int)$group_id || $this->error('用户组ID错误');
         $auth_group = $this->authGroup();
-        return $this->setView([
+        $this->fetch('', [
             'auth_group' => $auth_group,
             'group_id' => $group_id,
             'metaTitle'=> '用户授权'
@@ -85,16 +86,20 @@ class AuthManager extends Admin
 
     /**
      * 用户组授权用户列表
-     * @author staitc7 <static7@qq.com>
      * @param int $group_id 组ID
      * @param int $page 页码
      * @param int $limit 每条页数
      * @return mixed
      */
-    public function userJson($group_id = 0,$page=1,$limit=10)
+    public function userJson()
     {
-        $member = $this->app->config->get('config.auth_config.auth_user');
-        $auth_group_access = $this->app->config->get('config.auth_config.auth_group_access');
+        $data = $this->requestex()->param();
+        $group_id = $data['group_id'] ?? 0;
+        $limit = $data['limit'] ?? 10;
+        $page = $data['page'] ?? 1;
+
+        $member = 'member';
+        $auth_group_access = 'auth_group_access';
         $viewData = Db::view($member, 'uid,nickname,last_login_time,last_login_ip,status')
             ->view($auth_group_access, 'group_id', "{$auth_group_access}.uid={$member}.uid")
             ->where('group_id','=',$group_id)
@@ -238,27 +243,29 @@ class AuthManager extends Admin
 
     /**
      * 用户授权
-     * @param int $id 用户ID
-     * @author staitc7 <static7@qq.com>
      * @return mixed
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
      */
-    public function group($id = 0) {
+    public function group() {
+        $id = $this->requestex()->get('id') ?? 0;
         (int)$id || $this->error('参数错误');
-        $AuthGroup = $this->app->model('AuthGroup');
+        $AuthGroup = $this->model('AuthGroupModel');
         $map = [
             ['status', '=', 1],
-            ['type', '=', $this->app->config->get('config.auth_config.type_admin')],
-            ['module', '=', $this->app->request->module()]
+            ['type', '=', 1],
+            ['module', '=', 'admin']
         ];
         $auth_groups = $AuthGroup->mapList($map, 'id,title');
-        $auth_group_access = $this->app->config->get('config.auth_config.auth_group_access');
-        $auth_group = $this->app->config->get('config.auth_config.auth_group');
+        $auth_group_access = 'auth_group_access';
+        $auth_group = 'auth_group';
         $user_group = Db::view($auth_group_access, 'uid,group_id')
             ->view($auth_group, 'id', "{$auth_group_access}.group_id={$auth_group}.id")
             ->where("uid = :uid and status = :status",['uid' => $id, 'status' => 1])
             ->select();
         $user_groups = $user_group ? array_column($user_group, 'group_id') : null;
-        return $this->setView([
+        $this->fetch('', [
             'user_id' => $id,
             'auth_groups' => $auth_groups,
             'user_groups' => $user_groups ? implode(',', $user_groups) : null
@@ -273,19 +280,21 @@ class AuthManager extends Admin
      */
     public function userToGroup($group_id = [], $uid = 0)
     {
+        $uid = $this->requestex()->param('uid') ?? 0;
+        $group_id = $this->requestex()->param('group_id') ?? [];
         (int)$uid || $this->error('用户ID错误');
-        UserInfo::isAdmin((int)$uid) && $this->error("该用户为超级管理员");
+        $this->isAdmin() && $this->error("该用户为超级管理员");
         $group_ids = [];
         if (!empty($group_id)) {
             $group_ids = array_filter($group_id);
-            $AuthGroup = $this->app->model('AuthGroup');
+            $AuthGroup = $this->model('AuthGroupModel');
             foreach ($group_ids as $v) {
                 if (empty($AuthGroup->checkGroupId((int)$v))) {
                     return $this->error("编号 {$v} 用户组不存在");
                 };
             }
         }
-        $AuthGroupAccess = $this->app->model('AuthGroupAccess');
+        $AuthGroupAccess = $this->model('AuthGroupAccessModel');
         $info            = $AuthGroupAccess->userToGroup($uid, $group_ids);
         return $info ? $this->success('操作成功') : $this->error($AuthGroupAccess->getError());
     }
@@ -355,7 +364,7 @@ class AuthManager extends Admin
      */
     public function rulesArrayUpdate()
     {
-        $rules = $this->app->request->post();
+        $rules = $this->requestex()->post();
         (int)$rules['id'] || $this->error('参数错误');
         if (isset($rules['rules']) && !empty($rules['rules'])) {
             sort($rules['rules']);
@@ -363,13 +372,13 @@ class AuthManager extends Admin
             $rules['rules'] = [];
         }
         $data = [
-            'id' => $rules['id'], 'module' => $this->app->request->module(),
+            'id' => $rules['id'], 'module' => 'admin',
             'rules' => implode(',', array_unique($rules['rules'])),
-            'type' => $this->app->config->get('config.auth_config.type_admin')
+            'type' => 1
         ];
         $info = Db::name('AuthGroup')->update($data);
         return $info !== false ?
-            $this->success('操作成功', $this->app->url->build('AuthManager/index')) :
+            $this->success('操作成功', '/admin/authManager/index') :
             $this->error($info);
     }
 }

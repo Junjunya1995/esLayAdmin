@@ -8,6 +8,7 @@
 
 namespace App\Model;
 
+use App\Validates\UcenterMemberValidate;
 use think\Model;
 
 class UcenterMemberModel extends Model
@@ -18,7 +19,12 @@ class UcenterMemberModel extends Model
     protected $autoWriteTimestamp = true;
     protected $createTime         = 'reg_time';
     protected $update             = ['last_login_time', 'last_login_ip'];
+    private  $request;
 
+    protected static function init()
+    {
+
+    }
 
     /**
      * 用户登录认证
@@ -72,13 +78,13 @@ class UcenterMemberModel extends Model
 
     /**
      * 注册一个新用户
+     * @param $data
      * @return int 注册成功-用户信息，注册失败-错误编号
      * @internal param array $data 用户注册信息
      */
-    public function register()
+    public function register($data)
     {
-        $data     = Request::post();
-        $validate = App::validate('UcenterMember');
+        $validate =  new UcenterMemberValidate();
         if (!$validate->check($data)) {
             $this->error = $validate->getError(); // 验证失败 输出错误信息
             return false;
@@ -166,24 +172,6 @@ class UcenterMemberModel extends Model
         return strtolower($value);
     }
 
-    /**
-     * 获取ip
-     * @author staitc7 <static7@qq.com>
-     */
-    protected function setRegIpAttr()
-    {
-        //return Request::ip(1);
-    }
-
-
-    /**
-     * 最后登录ip
-     * @author staitc7 <static7@qq.com>
-     */
-    protected function setLastLoginIpAttr()
-    {
-        //return Request::ip(1);
-    }
 
     /**
      * 最后登录时间

@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: LWD
+ * User: wzj
  * Date: 2018/6/8
  * Time: 14:29
  */
@@ -61,12 +61,12 @@ class MemberModel extends Model
 
     /**
      * 添加用户
-     * @author staitc7 <static7@qq.com>
+     * @param $data
+     * @return array|bool
      */
-
-    public function userAdd() {
-        $UcenterMember = App::model('UcenterMember', 'model');
-        $register_data = $UcenterMember->register();
+    public function userAdd($data) {
+        $UcenterMember = new UcenterMemberModel();
+        $register_data = $UcenterMember->register($data);
         if ($UcenterMember->getError()) {
             $this->error= $UcenterMember->getError();
             return false;

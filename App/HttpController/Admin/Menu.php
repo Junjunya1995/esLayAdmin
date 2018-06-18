@@ -15,8 +15,6 @@ class Menu extends  Admin {
 
     /**
      * 菜单首页
-     * @param int $pid
-     * @author staitc7 <static7@qq.com>
      * @return mixed
      */
 
