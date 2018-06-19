@@ -9,7 +9,7 @@ namespace App\Model\Admin;
 use App\Traits\ModelTrait;
 use think\Model;
 
-class AuthGroupAccessModel extends Model
+class AuthGroupAccess extends Model
 {
 
     use ModelTrait;

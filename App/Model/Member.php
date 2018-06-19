@@ -12,7 +12,7 @@ namespace App\Model;
 use App\Traits\ModelTrait;
 use think\Model;
 
-class MemberModel extends Model
+class Member extends Model
 {
 
 
@@ -65,7 +65,7 @@ class MemberModel extends Model
      * @return array|bool
      */
     public function userAdd($data) {
-        $UcenterMember = new UcenterMemberModel();
+        $UcenterMember = new UcenterMember();
         $register_data = $UcenterMember->register($data);
         if ($UcenterMember->getError()) {
             $this->error= $UcenterMember->getError();

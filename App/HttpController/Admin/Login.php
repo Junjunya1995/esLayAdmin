@@ -9,8 +9,8 @@
 namespace App\HttpController\Admin;
 
 
-use App\Model\MemberModel;
-use App\Model\UcenterMemberModel;
+use App\Model\Member;
+use App\Model\UcenterMember;
 use EasySwoole\Config;
 use Lib\HttpController;
 use think\Template;
@@ -49,7 +49,7 @@ class Login extends HttpController
      */
     public function login()
     {
-        $UcenterMemberModel = new UcenterMemberModel();
+        $UcenterMemberModel = new UcenterMember();
 
         //判断是否ajax登录
         $this->requestex()->isPost() || $this->error('非法请求');
@@ -64,7 +64,7 @@ class Login extends HttpController
             return 0;
         }
         //更新用户信息
-        $Member = MemberModel::create();
+        $Member = Member::create();
         $info   = $Member->login($user_id, $this->requestex()->getIp());
         if ($info === false) {
             $this->error($Member->getError());

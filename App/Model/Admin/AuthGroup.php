@@ -10,7 +10,7 @@ namespace App\Model\Admin;
 use App\Traits\ModelTrait;
 use think\Model;
 
-class AuthGroupModel extends Model
+class AuthGroup extends Model
 {
     use ModelTrait;
     protected $auto = ['description', 'title', 'type'];

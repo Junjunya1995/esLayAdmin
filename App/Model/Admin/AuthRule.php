@@ -12,7 +12,7 @@ namespace App\Model\Admin;
 use App\Traits\ModelTrait;
 use think\Model;
 
-class AuthRuleModel extends Model
+class AuthRule extends Model
 {
     use ModelTrait;
     /**

@@ -12,7 +12,7 @@ use App\Traits\ModelTrait;
 use EasySwoole\Config;
 use think\Model;
 
-class DeployModel extends Model
+class Deploy extends Model
 {
     use ModelTrait;
     protected $autoWriteTimestamp = true; //自动写入创建和更新的时间戳字段

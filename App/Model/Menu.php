@@ -11,7 +11,7 @@ namespace App\Model;
 use App\Traits\ModelTrait;
 use think\Model;
 
-class MenuModel extends Model
+class Menu extends Model
 {
     use ModelTrait;
     protected $auto = ['title', 'url'];
