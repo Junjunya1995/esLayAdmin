@@ -64,7 +64,7 @@ return [
         // 是否需要断线重连
         'break_reconnect' => true,
         //开启模型后缀
-        'class_suffix' => true,
+        'class_suffix' => false,
         //分页配置
         'paginate' => [
             'type'     => 'bootstrap',
