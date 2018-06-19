@@ -70,13 +70,10 @@ class Menu extends Model
         if ($tree && !empty($tree_nodes[(int)$tree])) {
             return $tree_nodes[$tree];
         }
-        $model_name = 'admin'; //当前模块名称
         if ($tree) {
             $list = $this->menuField('id,pid,title,url,tip,hide');
             foreach ($list as $key => $value) {
-                if (stripos($value['url'], $model_name) !== 0) {
-                    $list[$key]['url'] = "{$model_name}/{$value['url']}";
-                }
+                $list[$key]['url'] = $value['url'];
             }
             $nodes = list_to_tree($list, 'id', 'pid', 'operator', 0);
             foreach ($nodes as $key => $value) {
@@ -88,9 +85,7 @@ class Menu extends Model
         } else {
             $nodes = $this->menuField('title,url,tip,pid');
             foreach ($nodes as $key => $value) {
-                if (stripos($value['url'], $model_name) !== 0) {
-                    $nodes[$key]['url'] = "{$model_name}/{$value['url']}";
-                }
+                $nodes[$key]['url'] = $value['url'];
             }
         }
         $tree_nodes[(int)$tree] = $nodes;

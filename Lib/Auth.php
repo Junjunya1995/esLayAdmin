@@ -65,9 +65,13 @@ namespace Lib;
   ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
  */
 
+use EasySwoole\Core\Http\Session\Session;
+use http\Env\Request;
 use think\Db;
 
 class Auth {
+    private $request;
+    private $session;
 
     //默认配置
     protected $config = [
@@ -85,19 +89,26 @@ class Auth {
         'auth_extend_model_type' => 2//模型权限标识
     ];
 
-    public function __construct() {}
+    public function __construct(HttpRequest $request ,Session $session) {
+        $this->session = $session;
+        $this->request = $request;
+    }
 
 
     /**
      * 检查权限
-     * @param  string|array $name 需要验证的规则列表,支持逗号分隔的权限规则或索引数组
-     * @param   int         $uid 认证用户的id
+     * @param  string|array $name     需要验证的规则列表,支持逗号分隔的权限规则或索引数组
+     * @param   int         $uid      认证用户的id
      * @param   int         $type
-     * @param string        $mode 执行check的模式
+     * @param string        $mode     执行check的模式
      * @param string        $relation 如果为 'or' 表示满足任一条规则即通过验证;如果为 'and'则表示需满足所有规则才能通过验证
      * @return boolean           通过验证返回true;失败返回false
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
      */
     public function check($name, $uid, $type = 1, $mode = 'url', $relation = 'or') {
+
         if (!$this->config['auth_on']) {
             return true;
         }
@@ -110,12 +121,13 @@ class Auth {
             $name = strpos($name, ',') !== false ? explode(',', $name) : [$name];
         }
         if ($mode == 'url') {
-            $request = unserialize(strtolower(serialize(Request::param())));
+            $request = unserialize(strtolower(serialize($this->request->param())));
         }
         $list = []; //保存验证通过的规则名
         foreach ($authList as $auth) {
             $query = preg_replace('/^.+\?/U', '', $auth);
             if ($mode == 'url' && $query != $auth) {
+
                 parse_str($query, $param); //解析规则中的param
                 $intersect = array_intersect_assoc($request, $param);
                 $auth = preg_replace('/\?.*$/U', '', $auth);
@@ -137,9 +149,12 @@ class Auth {
 
     /**
      * 获得权限列表
-     * @param integer $uid 用户id
+     * @param integer $uid  用户id
      * @param integer $type 类型
      * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
      */
     private function getAuthList($uid, $type) {
         static $_authList = []; //保存用户验证通过的权限列表
@@ -147,15 +162,14 @@ class Auth {
         if (isset($_authList[$uid . $t])) {
             return $_authList[$uid . $t];
         }
-        if ($this->config['auth_type'] == 2 && Session::has('_auth_list_' . $uid . $t)) {
-            return Session::get('_auth_list_' . $uid . $t);
+        if ($this->session->get('_auth_list_' . $uid . $t)) {
+            //return $this->session->get('_auth_list_' . $uid . $t);
         }
 
         $groups = $this->getGroups($uid);//读取用户所属用户组
         if ($groups===false){
             return false;
         }
-
         $ids = []; //保存用户所属用户组设置的所有权限规则id
         foreach ($groups as $v) {
             $ids = array_merge($ids, explode(',', trim($v['rules'], ',')));
@@ -171,7 +185,7 @@ class Auth {
             ['status','=', 1],
             ['id','in', $ids],
         ];
-        $rules = Db::name($this->config['auth_rule'])->where($map)->field('condition,name')->select();//读取用户组所有权限规则
+        $rules = Db::name('auth_rule')->where($map)->field('condition,name')->select();//读取用户组所有权限规则
         $authList = [];
         foreach ($rules as $rule) {//循环规则，判断结果。
             if (!empty($rule['condition'])) { //根据condition进行验证
@@ -185,7 +199,7 @@ class Auth {
             }
         }
         $_authList[$uid . $t] = $authList;
-        (int)$this->config['auth_type'] === 2 && Session::set('_auth_list_' . $uid . $t, $authList); //规则列表结果保存到session
+        //$this->session->set('_auth_list_' . $uid . $t, $authList); //规则列表结果保存到session
         return array_unique($authList);
     }
 
@@ -201,8 +215,8 @@ class Auth {
         if (isset($groups[$uid])) {
             return $groups[$uid];
         }
-        $user_groups = Db::view($this->config['auth_group_access'], 'uid,group_id')
-            ->view($this->config['auth_group'], 'title,rules', "{$this->config['auth_group_access']}.group_id={$this->config['auth_group']}.id")
+        $user_groups = Db::view('auth_group_access', 'uid,group_id')
+            ->view('auth_group', 'title,rules', "auth_group_access.group_id=auth_group.id")
             ->where('uid',$uid)
             ->where('status',1)
             ->select();
@@ -216,10 +230,10 @@ class Auth {
      */
     private function getUserInfo($uid) {
         static $userinfo = [];
-        $user = Db::name($this->config['auth_user']);
+        $user = Db::name('member');
         $_pk = is_string($user->getPk()) ? $user->getPk() : 'user_id';// 获取用户表主键
         if (!isset($userinfo[$uid])) {
-            $userinfo[$uid] = $user->where($_pk, $uid)->field($this->config['auth_user_field']?:'*')->find();
+            $userinfo[$uid] = $user->where($_pk, $uid)->field('*')->find();
         }
         return $userinfo[$uid];
     }

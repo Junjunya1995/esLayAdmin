@@ -7,7 +7,7 @@
 namespace App\HttpController\Admin;
 
 
-use App\Model\DeployModel;
+use App\Model\Admin\Deploy as DeployModel;
 
 class Deploy extends Admin {
 
@@ -40,7 +40,7 @@ class Deploy extends Admin {
             ['group',(int)$group ? '=':'>=', (int)$group?:0]
         ];
         $field = 'id,name,group,type,sort,area,title';
-        $data  = $this->model('DeployModel')->listsJson($map, $field, 'sort asc', $page, $limit);
+        $data  = $this->model('Deploy')->listsJson($map, $field, 'sort asc', $page, $limit);
         return $this->layuiJson($data);
     }
 
@@ -74,7 +74,7 @@ class Deploy extends Admin {
         $id = $this->request()->getQueryParam('id') ?? 1;
         (int)$id || $this->error('参数错误');
         $field = 'id,name,title,extra,value,remark,type';
-        $Model = $this->model('DeployModel');
+        $Model = $this->model('Deploy');
         $data  = $Model->lists([['group','=',(int)$id],['status','=', 1]], $field, 'sort desc');
         $type  = [1=>'基本', 2=>'内容', 3=>'用户', 4=>'系统'];
         $this->fetch('' ,[
@@ -93,7 +93,7 @@ class Deploy extends Admin {
      */
     public function edit($id = 0) {
         if ((int)$id > 0) {
-            $info = $this->app->model('Deploy')->edit((int)$id);
+            $info = $this->model('Deploy')->edit((int)$id);
         }
         return $this->setView(['info'=>$info ?? null,'metaTitle' => '配置详情']);
     }
@@ -107,7 +107,7 @@ class Deploy extends Admin {
         if (!$config && !is_array($config)) {
             return $this->error('数据有误，请检查后在保存');
         }
-        $Deploy = $this->app->model('Deploy');
+        $Deploy = $this->model('Deploy');
         $info=$Deploy->batchSave($config);
         if ($info !== false) {
             $this->app->cache->rm('system_config');

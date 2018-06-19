@@ -23,7 +23,7 @@ class Menu extends  Admin {
         $pid = $this->request()->getQueryParam('pid') ?? 0;
         $father = null;
         try {
-            $father = $this->model('MenuModel')->father($pid);
+            $father = $this->model('Menu')->father($pid);
         } catch (ModelNotFoundException $e) {
         }
         $this->assign([
@@ -47,7 +47,7 @@ class Menu extends  Admin {
             ['pid', '=', (int)$data['pid'] ?: 0]
         ];
         try {
-            $data = $this->model('MenuModel')
+            $data = $this->model('Menu')
                 ->listsJson($map, null, 'sort asc,id asc', (int)$data['page'] ?? 1, $data['limit'] ?? 10);
         } catch (ModelNotFoundException $e) {
 
@@ -72,7 +72,7 @@ class Menu extends  Admin {
         empty($ids) && $this->error('请选择要操作的数据');
         is_numeric((int)$value) || $this->error('参数错误');
         $key = ((string)$field == 'hide') ? 'hide' : 'is_dev';
-        $info = $this->model('MenuModel')->setStatus([['id','in', $ids]], [$key => $value]);
+        $info = $this->model('Menu')->setStatus([['id','in', $ids]], [$key => $value]);
         if ($info === false) {
             return $this->error($value == -1 ? '删除失败' : '更新失败');
         }
@@ -89,7 +89,7 @@ class Menu extends  Admin {
     public function add() {
         $pid = $this->request()->getQueryParam('pid') ?? 0;
 
-        $menu_list_all =$this->model('MenuModel')->menuListAll(); //获取所有的菜单
+        $menu_list_all =$this->model('Menu')->menuListAll(); //获取所有的菜单
         if (is_array($menu_list_all)){
             $tree=Tree::toFormatTree($menu_list_all);
         }
@@ -100,7 +100,7 @@ class Menu extends  Admin {
      * 用户更新或者添加菜单
      */
     public function renew() {
-        $Menu =$this->model('MenuModel');
+        $Menu =$this->model('Menu');
         $info = $Menu->renew($this->request()->getParsedBody());
         if ($info===false) {
             return $this->error($Menu->getError());
@@ -120,7 +120,7 @@ class Menu extends  Admin {
     public function edit()
     {
         $id = $this->request()->getQueryParam('id');
-        $Menu = $this->model('MenuModel');
+        $Menu = $this->model('Menu');
         if ((int)$id > 0) {
             $info = $Menu->edit((int)$id);
         }

@@ -19,7 +19,6 @@ class Index extends Admin
 
     public function index()
     {
-        $this->dump($this->isAdmin());
         return $this->fetch();
     }
 

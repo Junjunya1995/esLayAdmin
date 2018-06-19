@@ -30,7 +30,7 @@ class Member extends Admin
         if (!$this->requestex()->isAjax()) {
             return $this->error('系统错误!,请重新刷新页面');
         }
-        $data = $this->model('MemberModel')->listsJson([['status','<>',-1]], '', '', (int)$page ?: 1,$limit);
+        $data = $this->model('Member')->listsJson([['status','<>',-1]], '', '', (int)$page ?: 1,$limit);
         $this->layuiJson($data);
     }
 
@@ -48,7 +48,7 @@ class Member extends Admin
      */
     public function renew()
     {
-        $Member =$this->model('MemberModel');
+        $Member =$this->model('Member');
         $data = $this->requestex()->param();
         $data['reg_ip'] = $this->requestex()->getIp();
         $info=$Member->userAdd($data);
@@ -69,7 +69,7 @@ class Member extends Admin
     public function edit($uid=0)
     {
         if ((int)$uid>0){
-            $info=$this->app->model('Member')->edit($uid);
+            $info=$this->model('Member')->edit($uid);
         }
         //print_r($info);exit;
         return $this->setView(['info'=>$info ?? null],'detail');
@@ -85,7 +85,7 @@ class Member extends Admin
     public function setStatus($value = null, $ids = null) {
         empty($ids) && $this->error('请选择要操作的数据');
         is_numeric((int)$value) || $this->error('参数错误');
-        $info = $this->app->model('Member')->setStatus([['uid','in', (int)$ids]], ['status' => $value]);
+        $info = $this->model('Member')->setStatus([['uid','in', (int)$ids]], ['status' => $value]);
         return $info !== false ?
             $this->success($value == -1 ? '删除成功' : '更新成功') :
             $this->error($value == -1 ? '删除失败' : '更新失败');

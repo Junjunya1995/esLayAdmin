@@ -37,7 +37,7 @@ class AuthManager extends Admin
             ['module', '=', 'admin'],
             ['status', '<>', -1]
         ];
-        $data = $this->model('Admin\AuthGroupModel')->listsJson($map, null, 'id asc', (int)$page ?: 1,$limit);
+        $data = $this->model('AuthGroup')->listsJson($map, null, 'id asc', (int)$page ?: 1,$limit);
         return $this->layuiJson($data);
     }
 
@@ -51,13 +51,14 @@ class AuthManager extends Admin
         (int)$group_id || $this->error('用户组ID错误');
         $this->updateRules();
         $auth_group = $this->authGroup();
-        $node_list = $this->model('MenuModel')->returnNodes();
+        $node_list = $this->model('Menu')->returnNodes();
         $map = ['status','=',1];
         $ruleArray= ['type','=',2];
-        $AuthRule = $this->model('AuthRuleModel');
+        $AuthRule = $this->model('AuthRule');
         $main_rules = $AuthRule->mapList([$map,$ruleArray], 'name,id');
         $ruleArray=['type','=', 1];
         $child_rules = $AuthRule->mapList([$map,$ruleArray], 'name,id');
+
         $this->fetch('',[
             'main_rules' => array_column($main_rules,'id','name'),
             'auth_rules' => array_column($child_rules,'id','name'),
@@ -172,7 +173,7 @@ class AuthManager extends Admin
             ['module' ,'=', 'admin'],
             ['type' ,'=',1]
         ];
-        $auth_group_tmp = $this->model('AuthGroupModel')->mapList($map, 'id,title,rules');
+        $auth_group_tmp = $this->model('AuthGroup')->mapList($map, 'id,title,rules');
         $auth_group = null;
         if ($auth_group_tmp) {
             foreach ($auth_group_tmp as $k => $v) {
@@ -251,7 +252,7 @@ class AuthManager extends Admin
     public function group() {
         $id = $this->requestex()->get('id') ?? 0;
         (int)$id || $this->error('参数错误');
-        $AuthGroup = $this->model('AuthGroupModel');
+        $AuthGroup = $this->model('AuthGroup');
         $map = [
             ['status', '=', 1],
             ['type', '=', 1],
@@ -287,14 +288,14 @@ class AuthManager extends Admin
         $group_ids = [];
         if (!empty($group_id)) {
             $group_ids = array_filter($group_id);
-            $AuthGroup = $this->model('AuthGroupModel');
+            $AuthGroup = $this->model('AuthGroup');
             foreach ($group_ids as $v) {
                 if (empty($AuthGroup->checkGroupId((int)$v))) {
                     return $this->error("编号 {$v} 用户组不存在");
                 };
             }
         }
-        $AuthGroupAccess = $this->model('AuthGroupAccessModel');
+        $AuthGroupAccess = $this->model('AuthGroupAccess');
         $info            = $AuthGroupAccess->userToGroup($uid, $group_ids);
         return $info ? $this->success('操作成功') : $this->error($AuthGroupAccess->getError());
     }
@@ -307,11 +308,11 @@ class AuthManager extends Admin
      */
     private function updateRules()
     {
-        $nodes = $this->model('MenuModel')->returnNodes(false);//需要新增的节点必然位于$nodes
-        $AuthRule = $this->model('Admin\AuthRuleModel');
+        $nodes = $this->model('Menu')->returnNodes(false);//需要新增的节点必然位于$nodes
+        $AuthRule = $this->model('AuthRule');
         $rules = $AuthRule->ruleList();//需要更新和删除的节点必然位于$rules
         if (empty($rules)) {
-            return $this->error('没有权限规则');
+            //return $this->error('没有权限规则');
         }
         //构建insert数据
         $data = []; //保存需要插入和更新的新节点
