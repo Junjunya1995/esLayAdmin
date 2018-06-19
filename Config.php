@@ -63,6 +63,9 @@ return [
         'prefix'          => 'tp5_',
         // 是否需要断线重连
         'break_reconnect' => true,
+        //开启模型后缀
+        'class_suffix' => true,
+        //分页配置
         'paginate' => [
             'type'     => 'bootstrap',
             'var_page'  => 'page',
