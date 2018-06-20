@@ -164,7 +164,7 @@ class Auth {
             return $_authList[$uid . $t];
         }
         if ($this->session->get('_auth_list_' . $uid . $t)) {
-            return $this->session->get('_auth_list_' . $uid . $t);
+            //return $this->session->get('_auth_list_' . $uid . $t);
         }
 
         $groups = $this->getGroups($uid);//读取用户所属用户组
