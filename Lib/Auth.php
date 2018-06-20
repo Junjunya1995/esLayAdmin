@@ -123,6 +123,7 @@ class Auth {
         if ($mode == 'url') {
             $request = unserialize(strtolower(serialize($this->request->param())));
         }
+
         $list = []; //保存验证通过的规则名
         foreach ($authList as $auth) {
             $query = preg_replace('/^.+\?/U', '', $auth);
@@ -163,7 +164,7 @@ class Auth {
             return $_authList[$uid . $t];
         }
         if ($this->session->get('_auth_list_' . $uid . $t)) {
-            //return $this->session->get('_auth_list_' . $uid . $t);
+            return $this->session->get('_auth_list_' . $uid . $t);
         }
 
         $groups = $this->getGroups($uid);//读取用户所属用户组
@@ -199,7 +200,7 @@ class Auth {
             }
         }
         $_authList[$uid . $t] = $authList;
-        //$this->session->set('_auth_list_' . $uid . $t, $authList); //规则列表结果保存到session
+        $this->session->set('_auth_list_' . $uid . $t, $authList); //规则列表结果保存到session
         return array_unique($authList);
     }
 

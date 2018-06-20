@@ -81,8 +81,7 @@ class Admin extends HttpController
         }
         $menus = $this->session()->get('admin_meun_list');
         if ($menus) {
-            //TODO :
-            //return $menus;
+            return $menus;
         }
         $controller = strtolower($this->getControllerName());//当前的控制器名
         $action = strtolower($this->getActionName());//当前的操作名
@@ -100,14 +99,12 @@ class Admin extends HttpController
         foreach ($menus['main'] as $key => $item) {
             $item['url'] = strtolower($item['url']);
             // 判断主菜单权限
-            $this->dump($this->checkRule($url, 2, null));
-            if (!$this->isAdmin() && !$this->checkRule($url, 2, null)) {
+            if (!$this->isAdmin() && !$this->checkRule($item['url'], 2, null)) {
                 unset($menus['main'][$key]);
                 continue; //继续循环
             }
             $url  == $item['url'] ? $menus['main'][$key]['class'] = 'layui-this' : null;
         }
-        $this->dump($menus);
         $map = [
             ['pid', '<>', 0],
             ['hide', '=', 0],
@@ -133,6 +130,9 @@ class Admin extends HttpController
                         }
                         $menuList = Db::name("menu")->where($where)->field('id,pid,title,url,tip')->order('sort asc')->select();
                         $menus['child'][$g] = list_to_tree($menuList, 'id', 'pid', 'operater', $item['id']);
+                        if (count($menus['child'][$g]) == 0) {
+                            unset($menus['child'][$g]);
+                        }
                     }
                 }
             }
@@ -180,7 +180,6 @@ class Admin extends HttpController
         static $Auth_static = null;
         $Auth = $Auth_static ?? new Auth($this->requestex(), $this->session());
         $type = $type ? $type : 1;
-        return $Auth->check($rule, $this->isLogin(), $type, $mode);
         if (!$Auth->check($rule, $this->isLogin(), $type, $mode)) {
             return false;
         }
