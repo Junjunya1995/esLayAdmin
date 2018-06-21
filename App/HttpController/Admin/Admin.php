@@ -134,15 +134,13 @@ class Admin extends HttpController
     /**
      * 非超级管理员的权限检测
      * @param array $second_urls
-     * @author staitc7 <static7@qq.com>
      * @return mixed
+     * @throws ModelNotFoundException
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @author staitc7 <static7@qq.com>
      */
     private function toCheckUrl(array $second_urls = []) {
-//        // 检测菜单权限
-//        if (empty(UserInfo::userId())) {
-//            return null;
-//        }
-        //$module = $this->app->request->module();
         $to_check_urls = [];
         if (empty($second_urls)){
             return null;
@@ -155,13 +153,16 @@ class Admin extends HttpController
         }
         return empty($to_check_urls) ? null : $to_check_urls;
     }
+
     /**
      * 权限检测
      * @param string $rule 检测的规则
-     * @param null $type
+     * @param null   $type
      * @param string $mode check模式
      * @return bool
-     * @author 朱亚杰  <xcoolcc@gmail.com>
+     * @throws ModelNotFoundException
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
      */
     final private function checkRule($rule, $type = null, $mode = 'url') {
         static $Auth_static = null;

@@ -58,24 +58,24 @@ class Personal extends  Admin
 
     /**
      * 修改密码提交
-     * @param string $old_password 原密码
-     * @param string $password 新密码
-     * @param string $repassword 确认密码
-     * @author huajie <banhuajie@163.com>
      */
-    public function submitPassword($old_password = null, $password = null, $repassword = null) {
+    public function submitPassword() {
+        $data = $this->requestex()->param();
+        $old_password = $data['old_password'] ;
+        $password = $data['password'] ;
+        $repassword = $data['repassword'] ;
         empty($old_password) && $this->error('请输入原密码');
         empty($password) && $this->error('请输入新密码');
         empty($repassword) && $this->error('请输入确认密码');
-        $UcenterMember = $this->app->model('UcenterMember', 'models');
-        $res = $UcenterMember->updateUserFields(UserInfo::userId(), $old_password, [
+        $UcenterMember = $this->model('UcenterMember');
+        $res = $UcenterMember->updateUserFields($this->isLogin(), $old_password, [
             'repassword'=>$repassword,
             'password' => $password
         ]);
         if ($res===false) {
             return $this->error($UcenterMember->getError());
         }
-        UserInfo::logout();
+        $this->session()->destroy();
         return $this->success('修改密码成功,请重新登录 ');
     }
 

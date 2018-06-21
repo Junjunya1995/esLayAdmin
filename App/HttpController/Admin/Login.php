@@ -88,13 +88,7 @@ class Login extends HttpController
         $this->session()->set('user_info', $data);
         $this->session()->set('user_auth', $auth);
         $this->session()->set('user_auth_sign', data_auth_sign((array)$auth));
-//        //记录行为
-//        $param = [
-//            'action' => 'user_login',
-//            'model' => __CLASS__,
-//            'record_id' => $data['uid'],
-//            'user_id'=>$data['uid']
-//        ];
+
         return true;
     }
 

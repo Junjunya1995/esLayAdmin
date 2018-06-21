@@ -117,7 +117,7 @@ class UcenterMember extends Model
             return false;
         }
         //更新用户信息
-        $validate = App::validate('UcenterMember');
+        $validate = new UcenterMemberValidate();
         if (!$validate->scene('edit')->check($tmp_data)) {
             $this->error= $validate->getError();
             return false;
