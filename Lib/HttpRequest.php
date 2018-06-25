@@ -8,8 +8,8 @@
 
 namespace Lib;
 
-
 use EasySwoole\Core\Http\Request;
+
 
 /**
  * Class HttpRequest

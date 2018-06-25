@@ -8,7 +8,9 @@
 
 namespace App\HttpController\Admin;
 
-class Personal extends  Admin
+use App\Facade\PictureUpload;
+
+class Personal extends Admin
 {
 
     /**
@@ -24,28 +26,28 @@ class Personal extends  Admin
 
     /**
      * 修改昵称提交
-     * @param string $password 密码
-     * @param string $nickname 昵称
-     * @author huajie <banhuajie@163.com>
      */
-    public function submitNickname($password = null, $nickname = null)
+    public function submitNickname()
     {
+        $data = $this->requestex()->param();
+        $password = $data['password'];
+        $nickname = $data['nickname'];
         empty($password) && $this->error('请输入密码');
         empty($nickname) && $this->error('请输入昵称');
-        $uid = $this->app->model('UcenterMember', 'models')->login(UserInfo::userId(), $password, 4); //密码验证
+        $uid = $this->model('UcenterMember')->login($this->isLogin(), $password, 4); //密码验证
         if ($uid == -2) {
             return $this->error('密码不正确');
         }
-        $Member = $this->app->model('Member');
-        $data   = $Member->renew(['nickname' => $nickname, 'uid' => UserInfo::userId()]);
+        $Member = $this->model('Member');
+        $data   = $Member->renew(['nickname' => $nickname, 'uid' => $this->isLogin()]);
         if ($data === false) {
             return $this->error($Member->getError());
         }
-        $user             = $this->app->session->get('user_auth');
+        $user             = $this->session()->get('user_auth');
         $user['username'] = $data['nickname'];
-        $this->app->session->set('user_auth', $user);
-        $this->app->session->set('user_auth_sign', data_auth_sign($user));
-        return $this->success('修改昵称成功！');
+        $this->session()->set('user_auth', $user);
+        $this->session()->set('user_auth_sign', data_auth_sign($user));
+        $this->success('修改昵称成功！');
     }
 
     /**
@@ -94,13 +96,16 @@ class Personal extends  Admin
      */
     public function submitPortrait()
     {
-        $data = PictureUpload::upload('UserPicture');
+
+        $data = PictureUpload::upload($this->requestex(), 'UserPicture');
+        $this->dump($data);
+        return;
         if ($data===false){
             $this->error(PictureUpload::getError());
         }
         //更新头像
-        Db::name('Member')->update(['uid'=>UserInfo::userId(), 'portrait'=>$data['id']]);
-        $this->app->cookie->delete("user_".UserInfo::userId(),'portrait_');//删除旧头像
+        Db::name('Member')->update(['uid'=>$this->isLogin(), 'portrait'=>$data['id']]);
+        $this->app->cookie->delete("user_".$this->isLogin(),'portrait_');//删除旧头像
         return $this->success('上传成功!', '', $data);
     }
 
